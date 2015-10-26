@@ -10,12 +10,13 @@ namespace Aiv.Engine
 
 		public Engine engine;
 
+		private bool _enabled = false;
 		public bool enabled {
 			get {
-				return enabled;
+				return _enabled;
 			}
 			set {
-				if (value != enabled) {
+				if (value != _enabled) {
 					// call Enable/Disable events
 					if (value) {
 						if (this.OnEnable != null)
@@ -25,6 +26,7 @@ namespace Aiv.Engine
 							OnDisable (this);
 					}
 				}
+				_enabled = value;
 			}
 		}
 

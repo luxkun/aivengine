@@ -43,6 +43,11 @@ namespace Aiv.Engine
 			this.window.KeyDown += new KeyEventHandler (this.KeyDown);
 			this.window.KeyUp += new KeyEventHandler (this.KeyUp);
 
+			this.window.Paint += new PaintEventHandler (this.Paint);
+
+			this.window.Load += new EventHandler (this.StartGameThread);
+
+
 			this.fps = fps;
 
 			this.windowGraphics = Graphics.FromHwnd (this.window.Handle);
@@ -55,7 +60,18 @@ namespace Aiv.Engine
 			this.keyboardTable = new Dictionary<Keys, bool> ();
 
 			this.mainLoop = new Thread (new ThreadStart (this.GameLoop));
+			this.mainLoop.SetApartmentState (ApartmentState.STA);
 
+		}
+
+		private void Paint(object sender, PaintEventArgs e) {
+			Console.WriteLine ("Paint()");
+			this.windowGraphics = e.Graphics;
+		}
+
+		private void StartGameThread(object sender, EventArgs e) {
+			this.isGameRunning = true;
+			this.mainLoop.Start ();
 		}
 
 		public void DestroyAllObjects() {
@@ -67,8 +83,7 @@ namespace Aiv.Engine
 		}
 
 		public void Run() {
-			this.isGameRunning = true;
-			this.mainLoop.Start ();
+			Application.Run (this.window);
 		}
 
 		[STAThread]
@@ -76,10 +91,12 @@ namespace Aiv.Engine
 			// compute update frequency
 			int freq = 1000/this.fps;
 			this.startTicks = this.ticks;
+
 			while (isGameRunning) {
+				Console.WriteLine ("running " + this.ticks);
 				int startTick = this.ticks;
 
-				windowGraphics.Clear (Color.Black);
+				this.workingGraphics.Clear (Color.Black);
 
 				foreach (GameObject obj in this.objects.Values) {
 					if (!obj.enabled)
@@ -88,7 +105,8 @@ namespace Aiv.Engine
 				}
 
 				// commit graphics updates
-				windowGraphics.DrawImage (this.workingBitmap, 0, 0);
+				this.windowGraphics.DrawImage (this.workingBitmap, 0, 0);
+
 				int endTick = this.ticks;
 
 				// check if we need to slowdown
@@ -120,9 +138,13 @@ namespace Aiv.Engine
 		 */
 
 		public void SpawnObject(string name, GameObject obj) {
+			Console.WriteLine ("Spawning");
 			obj.name = name;
 			obj.engine = this;
+			obj.enabled = true;
+			Console.WriteLine ("Assigning object");
 			this.objects [name] = obj;
+			Console.WriteLine ("calling Start()");
 			obj.Start ();
 		}
 

@@ -15,6 +15,7 @@ namespace Aiv.Engine
 			this.text = text;
 			this.font = new Font (fontName, fontSize);
 			this.brush = new SolidBrush (Color.FromName (colorName));
+			Console.WriteLine ("Text created");
 		}
 			
 		public override void Update() {
@@ -23,6 +24,7 @@ namespace Aiv.Engine
 			string text = this.text;
 			if (text == null)
 				text = "";
+			Console.WriteLine ("drawing text");
 			this.engine.workingGraphics.DrawString (text, this.font, this.brush, this.x, this.y);
 		}
 	}
