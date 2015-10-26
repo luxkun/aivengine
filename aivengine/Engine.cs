@@ -11,6 +11,9 @@ namespace Aiv.Engine
 		public Form window;
 		public int fps;
 
+		public Dictionary<string, GameObject> objects;
+		public Dictionary<string, Asset> assets;
+
 		// this is constantly filled with keyboard status
 		private Dictionary<Keys, bool> keyboardTable;
 
