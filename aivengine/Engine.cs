@@ -56,6 +56,10 @@ namespace Aiv.Engine
 			this.objects.Clear ();
 		}
 
+		public void Run() {
+			this.mainLoop.Start ();
+		}
+
 		[STAThread]
 		private void GameLoop() {
 			this.startTicks = this.ticks;
