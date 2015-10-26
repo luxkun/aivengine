@@ -49,6 +49,11 @@ namespace Aiv.Engine
 			this.workingBitmap = new Bitmap (width, height);
 			this.workingGraphics = Graphics.FromImage (this.workingBitmap);
 
+			// create dictionaries
+			this.objects = new Dictionary<string, GameObject> ();
+			this.assets = new Dictionary<string, Asset> ();
+			this.keyboardTable = new Dictionary<Keys, bool> ();
+
 			this.mainLoop = new Thread (new ThreadStart (this.GameLoop));
 
 		}
