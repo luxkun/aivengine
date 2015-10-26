@@ -17,6 +17,19 @@ namespace Aiv.Engine
 		// this is constantly filled with keyboard status
 		private Dictionary<Keys, bool> keyboardTable;
 
+		private Thread mainLoop;
+
+		public int startTicks;
+
+		public int ticks {
+			get {
+				return Environment.TickCount;
+			}
+		}
+
+		private Bitmap workingBitmap;
+		private Graphics windowGraphics;
+
 		public Engine (string windowName, int width, int height, int fps)
 		{
 			this.window = new Form ();
@@ -28,6 +41,24 @@ namespace Aiv.Engine
 
 			this.fps = fps;
 
+			this.windowGraphics = Graphics.FromHwnd (this.window.Handle);
+			this.workingBitmap = new Bitmap (width, height);
+
+			this.mainLoop = new Thread (new ThreadStart (this.GameLoop));
+
+		}
+
+		public void DestroyAllObjects() {
+			foreach (GameObject obj in this.objects.Values) {
+				obj.Destroy ();
+			}
+			// redundant now, could be useful in the future
+			this.objects.Clear ();
+		}
+
+		[STAThread]
+		private void GameLoop() {
+			this.startTicks = this.ticks;
 		}
 
 		/* 
@@ -36,7 +67,7 @@ namespace Aiv.Engine
 		 * 
 		 */
 
-		public GameObject AddObject(string name, GameObject obj) {
+		public void AddObject(string name, GameObject obj) {
 			obj.engine = this;
 			this.objects [name] = obj;
 		}
