@@ -32,6 +32,8 @@ namespace Aiv.Engine
 		private Bitmap workingBitmap;
 		public Graphics workingGraphics;
 
+		private bool isGameRunning = false;
+
 		public Engine (string windowName, int width, int height, int fps)
 		{
 			this.window = new Form ();
@@ -60,12 +62,30 @@ namespace Aiv.Engine
 		}
 
 		public void Run() {
+			this.isGameRunning = true;
 			this.mainLoop.Start ();
 		}
 
 		[STAThread]
 		private void GameLoop() {
 			this.startTicks = this.ticks;
+			while (isGameRunning) {
+				int startTick = this.ticks;
+
+				windowGraphics.Clear ();
+
+				foreach (GameObject obj in this.objects) {
+					if (!obj.enabled)
+						continue;
+					obj.Update ();
+				}
+
+				// commit graphics updates
+				windowGraphics.DrawImage (this.workingBitmap, 0, 0);
+				int endTick = this.ticks;
+
+				// check if we need to slowdown
+			}
 		}
 
 		/* 

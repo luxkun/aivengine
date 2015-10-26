@@ -12,10 +12,10 @@ namespace Aiv.Engine
 
 		public bool enabled {
 			get {
-				return this.enabled;
+				return enabled;
 			}
 			set {
-				if (value != this.enabled) {
+				if (value != enabled) {
 					// call Enable/Disable events
 					if (value) {
 						if (this.OnEnable != null)
