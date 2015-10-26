@@ -30,6 +30,24 @@ namespace Aiv.Engine
 
 		}
 
+		/* 
+		 * 
+		 * GameObject's management
+		 * 
+		 */
+
+		public GameObject AddObject(string name, GameObject obj) {
+			obj.engine = this;
+			this.objects [name] = obj;
+		}
+
+
+		/*
+		 * 
+		 * Keyboard management
+		 * 
+		 */
+
 		private void KeyDown(object sender, KeyEventArgs e) {
 			this.keyboardTable [e.KeyCode] = true;
 		}
