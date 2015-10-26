@@ -7,10 +7,8 @@ namespace Aiv.Engine
 
 		public SpriteAsset currentSprite;
 
-		public SpriteObject (string name, int x, int y) : base(name)
+		public SpriteObject (int x, int y) : base(x, y)
 		{
-			this.x = x;
-			this.y = y;
 		}
 
 		public override void Update() {

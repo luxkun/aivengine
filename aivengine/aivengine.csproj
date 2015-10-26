@@ -39,6 +39,7 @@
     <Compile Include="Asset.cs" />
     <Compile Include="SpriteObject.cs" />
     <Compile Include="SpriteAsset.cs" />
+    <Compile Include="TextObject.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

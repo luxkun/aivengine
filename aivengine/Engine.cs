@@ -115,6 +115,7 @@ namespace Aiv.Engine
 		 */
 
 		public void SpawnObject(string name, GameObject obj) {
+			obj.name = name;
 			obj.engine = this;
 			this.objects [name] = obj;
 			obj.Start ();
