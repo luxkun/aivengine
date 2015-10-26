@@ -68,13 +68,15 @@ namespace Aiv.Engine
 
 		[STAThread]
 		private void GameLoop() {
+			// compute update frequency
+			int freq = 1000/this.fps;
 			this.startTicks = this.ticks;
 			while (isGameRunning) {
 				int startTick = this.ticks;
 
-				windowGraphics.Clear ();
+				windowGraphics.Clear (Color.Black);
 
-				foreach (GameObject obj in this.objects) {
+				foreach (GameObject obj in this.objects.Values) {
 					if (!obj.enabled)
 						continue;
 					obj.Update ();
@@ -85,6 +87,9 @@ namespace Aiv.Engine
 				int endTick = this.ticks;
 
 				// check if we need to slowdown
+				if (endTick - startTick < freq) {
+					Thread.Sleep (freq - (endTick - startTick));
+				}
 			}
 		}
 
