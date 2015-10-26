@@ -37,6 +37,8 @@
     <Compile Include="Engine.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="Asset.cs" />
+    <Compile Include="SpriteObject.cs" />
+    <Compile Include="SpriteAsset.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

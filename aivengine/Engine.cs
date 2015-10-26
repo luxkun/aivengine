@@ -27,8 +27,10 @@ namespace Aiv.Engine
 			}
 		}
 
-		private Bitmap workingBitmap;
 		private Graphics windowGraphics;
+
+		private Bitmap workingBitmap;
+		public Graphics workingGraphics;
 
 		public Engine (string windowName, int width, int height, int fps)
 		{
@@ -43,6 +45,7 @@ namespace Aiv.Engine
 
 			this.windowGraphics = Graphics.FromHwnd (this.window.Handle);
 			this.workingBitmap = new Bitmap (width, height);
+			this.workingGraphics = Graphics.FromImage (this.workingBitmap);
 
 			this.mainLoop = new Thread (new ThreadStart (this.GameLoop));
 
@@ -71,9 +74,10 @@ namespace Aiv.Engine
 		 * 
 		 */
 
-		public void AddObject(string name, GameObject obj) {
+		public void SpawnObject(string name, GameObject obj) {
 			obj.engine = this;
 			this.objects [name] = obj;
+			obj.Start ();
 		}
 
 
