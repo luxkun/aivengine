@@ -43,14 +43,14 @@ namespace Aiv.Engine
 			this.window.KeyDown += new KeyEventHandler (this.KeyDown);
 			this.window.KeyUp += new KeyEventHandler (this.KeyUp);
 
-			this.window.Paint += new PaintEventHandler (this.Paint);
+			//this.window.Paint += new PaintEventHandler (this.Paint);
 
 			this.window.Load += new EventHandler (this.StartGameThread);
 
 
 			this.fps = fps;
 
-			this.windowGraphics = Graphics.FromHwnd (this.window.Handle);
+			
 			this.workingBitmap = new Bitmap (width, height);
 			this.workingGraphics = Graphics.FromImage (this.workingBitmap);
 
@@ -66,11 +66,12 @@ namespace Aiv.Engine
 
 		private void Paint(object sender, PaintEventArgs e) {
 			Console.WriteLine ("Paint()");
-			this.windowGraphics = e.Graphics;
+			//this.windowGraphics = e.Graphics;
 		}
 
 		private void StartGameThread(object sender, EventArgs e) {
-			this.isGameRunning = true;
+            this.windowGraphics = Graphics.FromHwnd(this.window.Handle);
+            this.isGameRunning = true;
 			this.mainLoop.Start ();
 		}
 
