@@ -93,6 +93,21 @@ namespace Aiv.Engine
 			}
 		}
 
+		/*
+		 * 
+		 * Asset's management
+		 * 
+		 */
+
+		public void LoadAsset(string name, Asset asset) {
+			asset.engine = this;
+			this.assets [name] = asset;
+		}
+
+		public Asset GetAsset(string name) {
+			return this.assets [name];
+		}
+
 		/* 
 		 * 
 		 * GameObject's management

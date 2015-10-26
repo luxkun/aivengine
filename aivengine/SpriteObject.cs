@@ -9,6 +9,8 @@ namespace Aiv.Engine
 
 		public SpriteObject (string name, int x, int y) : base(name)
 		{
+			this.x = x;
+			this.y = y;
 		}
 
 		public override void Update() {

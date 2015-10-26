@@ -8,8 +8,9 @@ namespace Aiv.Engine
 
 		public Bitmap sprite;
 
-		public SpriteAsset ()
+		public SpriteAsset (string fileName) : base(fileName)
 		{
+			this.sprite = new Bitmap (this.fileName);
 		}
 	}
 }
