@@ -41,6 +41,8 @@ namespace Aiv.Engine
 
         System.Timers.Timer timer;
 
+		PictureBox pbox;
+
         class MainWindow : Form
         {
             public MainWindow()
@@ -64,7 +66,7 @@ namespace Aiv.Engine
 				this.window.Text = windowName;
 				this.window.Size = new Size (width, height);
 
-           		
+
 
 				this.window.KeyDown += new KeyEventHandler (this.KeyDown);
 				this.window.KeyUp += new KeyEventHandler (this.KeyUp);
@@ -76,6 +78,10 @@ namespace Aiv.Engine
             
 
             this.windowGraphics = Graphics.FromHwnd(this.window.Handle);
+
+			this.pbox = new PictureBox ();
+			this.pbox.Dock = DockStyle.Fill;
+			this.window.Controls.Add (pbox);
 
 
             this.fps = fps;
@@ -98,13 +104,23 @@ namespace Aiv.Engine
             this.mainLoop = new Thread (new ThreadStart (this.GameLoop));
             this.mainLoop.SetApartmentState (ApartmentState.STA);
 
+
+			Application.Idle += new EventHandler (this.Update);
+
         }
 
-        private void Update(object sender, System.Timers.ElapsedEventArgs e)
+		int lastTick;
+
+		private void Update(object sender, EventArgs e)
+        //private void Update(object sender, System.Timers.ElapsedEventArgs e)
         {
             //Console.WriteLine("Update()");
 
-            int startTick = this.ticks;
+			if (this.ticks - lastTick < 1000 / this.fps)
+				return;
+			lastTick = this.ticks;
+
+			int startTick = lastTick;
 
             this.workingGraphics.Clear(Color.Black);
 
@@ -118,7 +134,9 @@ namespace Aiv.Engine
             }
 
             //Graphics g = this.window.CreateGraphics();
-            this.windowGraphics.DrawImageUnscaled(this.workingBitmap, 0, 0);
+            //this.windowGraphics.DrawImageUnscaled(this.workingBitmap, 0, 0);
+
+			this.pbox.Image = this.workingBitmap;
             
             //this.window.Invalidate();
             //this.window.Update();
@@ -142,7 +160,7 @@ namespace Aiv.Engine
 		private void StartGameThread(object sender, EventArgs e) {
             this.isGameRunning = true;
             //this.timer.Start();
-			this.mainLoop.Start ();
+			//this.mainLoop.Start ();
 		}
 
 		public void DestroyAllObjects() {
@@ -186,10 +204,13 @@ namespace Aiv.Engine
 				// commit graphics updates
 				//this.window.up ();
 
-				this.windowGraphics.DrawImageUnscaled (this.workingBitmap, 0, 0);
+				//Graphics g = this.window.CreateGraphics ();
+
+				//g.DrawImageUnscaled (this.workingBitmap, 0, 0);
 				//this.window.Invalidate ();
 				//this.window.Update ();
 
+				//this.pbox.Image = this.workingBitmap;
 
 				int endTick = this.ticks;
 
