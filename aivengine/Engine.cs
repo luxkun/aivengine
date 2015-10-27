@@ -39,12 +39,13 @@ namespace Aiv.Engine
 
 		private bool isGameRunning = false;
 
+        System.Timers.Timer timer;
 
         class MainWindow : Form
         {
             public MainWindow()
             {
-                //DoubleBuffered = true;
+                DoubleBuffered = true;
             }
         }
 
@@ -67,10 +68,12 @@ namespace Aiv.Engine
 
 				this.window.Load += new EventHandler (this.StartGameThread);
 
+            
+
+            this.windowGraphics = Graphics.FromHwnd(this.window.Handle);
 
 
-
-			this.fps = fps;
+            this.fps = fps;
 
 
 			
@@ -82,13 +85,40 @@ namespace Aiv.Engine
 			this.assets = new Dictionary<string, Asset> ();
 			this.keyboardTable = new Dictionary<Keys, bool> ();
 
-			this.mainLoop = new Thread (new ThreadStart (this.GameLoop));
-			this.mainLoop.SetApartmentState (ApartmentState.STA);
+            this.timer = new System.Timers.Timer(1000 / this.fps);
+            this.timer.Elapsed += new System.Timers.ElapsedEventHandler(this.Update);
+            this.timer.SynchronizingObject = this.window;
+            //this.timer.AutoReset = true;
 
-		}
+            //this.mainLoop = new Thread (new ThreadStart (this.GameLoop));
+            //this.mainLoop.SetApartmentState (ApartmentState.STA);
+
+        }
+
+        private void Update(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            //Console.WriteLine("Update()");
+            int startTick = this.ticks;
+
+            this.workingGraphics.Clear(Color.Black);
+
+            foreach (GameObject obj in this.objects.Values)
+            {
+                obj.deltaTicks = startTick - obj.ticks;
+                obj.ticks = startTick;
+                if (!obj.enabled)
+                    continue;
+                obj.Update();
+            }
+            //this.window.Invalidate();
+            //this.window.Update();
+            this.window.Refresh();
+        }
 
 		private void Paint(object sender, PaintEventArgs e) {
-			
+
+            //Console.WriteLine("Draw");
+            			
 			Graphics g = e.Graphics;
 
 			g.DrawImageUnscaled (this.workingBitmap, 0, 0);
@@ -97,7 +127,8 @@ namespace Aiv.Engine
 
 		private void StartGameThread(object sender, EventArgs e) {
             this.isGameRunning = true;
-			this.mainLoop.Start ();
+            this.timer.Start();
+			//this.mainLoop.Start ();
 		}
 
 		public void DestroyAllObjects() {
@@ -109,6 +140,7 @@ namespace Aiv.Engine
 		}
 
 		public void Run() {
+            
 			Application.Run (this.window);
 
 		}
@@ -119,7 +151,7 @@ namespace Aiv.Engine
 			int freq = 1000/this.fps;
 			this.startTicks = this.ticks;
 
-			this.windowGraphics = Graphics.FromHwnd(this.window.Handle);
+			
 
 			//this.windowGraphics = Gtk.DotNet.Graphics.FromDrawable (this.gWindow.GdkWindow);
 

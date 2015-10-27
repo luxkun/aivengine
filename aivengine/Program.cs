@@ -43,8 +43,9 @@ namespace Aiv.Engine
 
 	public class Program
 	{
+        
 		static void Main(string []args) {
-			Engine engine = new Engine ("Shooter", 1024, 768, 60);
+			Engine engine = new Engine ("Shooter", 1024, 768, 30);
 			TextObject to = new TextObject (10, 10, "Hello World", "Arial", 17, "red");
 			to.OnUpdate += new GameObject.UpdateEventHandler (Behaviours.MoveText);
 
