@@ -4,12 +4,16 @@ using System.Threading;
 using System.Drawing;
 using System.Collections.Generic;
 
+
 namespace Aiv.Engine
 {
 	public class Engine
 	{
 		public Form window;
 		public int fps;
+
+		public int width;
+		public int height;
 
 		public Dictionary<string, GameObject> objects;
 		public Dictionary<string, Asset> assets;
@@ -26,36 +30,43 @@ namespace Aiv.Engine
 				return Environment.TickCount;
 			}
 		}
-
-
+			
 
 		private Bitmap workingBitmap;
 		public Graphics workingGraphics;
 
+		private Graphics windowGraphics;
+
 		private bool isGameRunning = false;
+
 
         class MainWindow : Form
         {
             public MainWindow()
             {
-                DoubleBuffered = true;
+                //DoubleBuffered = true;
             }
         }
 
 		public Engine (string windowName, int width, int height, int fps)
 		{
-			this.window = new MainWindow ();
-			this.window.Text = windowName;
-			this.window.Size = new Size (width, height);
+			this.width = width;
+			this.height = height;
 
-           
 
-			this.window.KeyDown += new KeyEventHandler (this.KeyDown);
-			this.window.KeyUp += new KeyEventHandler (this.KeyUp);
+				this.window = new MainWindow ();
+				this.window.Text = windowName;
+				this.window.Size = new Size (width, height);
 
-			this.window.Paint += new PaintEventHandler (this.Paint);
+           		
 
-			this.window.Load += new EventHandler (this.StartGameThread);
+				this.window.KeyDown += new KeyEventHandler (this.KeyDown);
+				this.window.KeyUp += new KeyEventHandler (this.KeyUp);
+
+				this.window.Paint += new PaintEventHandler (this.Paint);
+
+				this.window.Load += new EventHandler (this.StartGameThread);
+
 
 
 
@@ -99,6 +110,7 @@ namespace Aiv.Engine
 
 		public void Run() {
 			Application.Run (this.window);
+
 		}
 
 
@@ -107,7 +119,9 @@ namespace Aiv.Engine
 			int freq = 1000/this.fps;
 			this.startTicks = this.ticks;
 
-			//this.windowGraphics = Graphics.FromHwnd(this.window.Handle);
+			this.windowGraphics = Graphics.FromHwnd(this.window.Handle);
+
+			//this.windowGraphics = Gtk.DotNet.Graphics.FromDrawable (this.gWindow.GdkWindow);
 
 			while (isGameRunning) {
 				
@@ -124,7 +138,12 @@ namespace Aiv.Engine
 				}
 
 				// commit graphics updates
+				//this.window.up ();
+
+				//this.windowGraphics.DrawImageUnscaled (this.workingBitmap, 0, 0);
 				this.window.Invalidate ();
+				//this.window.Update ();
+
 
 				int endTick = this.ticks;
 
