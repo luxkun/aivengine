@@ -43,12 +43,13 @@ namespace Aiv.Engine
 			this.window.Text = windowName;
 			this.window.Size = new Size (width, height);
 
+
 			this.window.KeyDown += new KeyEventHandler (this.KeyDown);
 			this.window.KeyUp += new KeyEventHandler (this.KeyUp);
 
 			//this.window.Paint += new PaintEventHandler (this.Paint);
 
-			//this.window.Load += new EventHandler (this.StartGameThread);
+			this.window.Load += new EventHandler (this.StartGameThread);
 
 			this.pbox = new PictureBox ();
 			//this.pbox = new Panel ();
@@ -66,8 +67,8 @@ namespace Aiv.Engine
 
 			this.timer = new System.Windows.Forms.Timer();
 			this.timer.Interval = 1000/this.fps;
-			this.timer.Tick += new EventHandler(this.Update);
-			this.timer.Start ();
+			//this.timer.Tick += new EventHandler(this.Update);
+			//this.timer.Start ();
 
 
 			//this.windowGraphics = Graphics.FromHwnd (this.pbox.Handle);
@@ -111,7 +112,7 @@ namespace Aiv.Engine
 			Console.WriteLine ("Paint()");
 			//this.windowGraphics = this.pbox.CreateGraphics ();//e.Graphics;
 			Graphics g = e.Graphics;
-			this.workingGraphics.Clear (Color.Black);
+			/*this.workingGraphics.Clear (Color.Black);
 
 			//this.workingGraphics = g;
 
@@ -119,9 +120,10 @@ namespace Aiv.Engine
 				if (!obj.enabled)
 					continue;
 				obj.Update ();
-			}
+			*/
 
-			g.DrawImage (this.workingBitmap, 0, 0);
+			g.DrawImageUnscaled (this.workingBitmap, 0, 0);
+            
 		}
 
 		private void StartGameThread(object sender, EventArgs e) {
@@ -159,15 +161,17 @@ namespace Aiv.Engine
 				this.workingGraphics.Clear (Color.Black);
 
 				foreach (GameObject obj in this.objects.Values) {
+                    obj.deltaTicks = startTick - obj.ticks;
+                    obj.ticks = startTick;
 					if (!obj.enabled)
 						continue;
 					obj.Update ();
 				}
 
 				// commit graphics updates
-				this.windowGraphics.DrawImage (this.workingBitmap, 0, 0);
+				//this.windowGraphics.DrawImage (this.workingBitmap, 0, 0);
 
-				this.pbox.Refresh ();
+                this.pbox.Invalidate();
 
 				//this.windowGraphics.Clear(Color.Black);
 				//this.windowGraphics.DrawEllipse (new Pen (Color.Red), 0, 0, 200, 200);

@@ -15,7 +15,7 @@ namespace Aiv.Engine
 				to.x -= 2;
 			}
 
-			to.text = to.x.ToString ();
+			to.text = to.deltaTicks.ToString();
 		}
 
 		public static void MoveSprite(object sender) {
@@ -29,11 +29,11 @@ namespace Aiv.Engine
 			}
 
 			if (to.engine.IsKeyDown(Keys.Up)) {
-				to.y -= 5;
+				to.y -= 10;
 			}
 
 			if (to.engine.IsKeyDown(Keys.Down)) {
-				to.y += 5;
+				to.y += 10;
 			}
 
 			to.currentSprite = (SpriteAsset) to.engine.GetAsset ("ship");

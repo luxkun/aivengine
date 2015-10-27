@@ -10,6 +10,9 @@ namespace Aiv.Engine
 
 		public Engine engine;
 
+        public int deltaTicks;
+        public int ticks;
+
 		private bool _enabled = false;
 		public bool enabled {
 			get {
