@@ -45,7 +45,12 @@ namespace Aiv.Engine
         {
             public MainWindow()
             {
-                DoubleBuffered = true;
+                //DoubleBuffered = true;
+                this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+                this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+                this.SetStyle(ControlStyles.UserPaint, false);
+                this.SetStyle(ControlStyles.FixedWidth, true);
+                this.SetStyle(ControlStyles.FixedHeight, true);
             }
         }
 
@@ -64,7 +69,7 @@ namespace Aiv.Engine
 				this.window.KeyDown += new KeyEventHandler (this.KeyDown);
 				this.window.KeyUp += new KeyEventHandler (this.KeyUp);
 
-				this.window.Paint += new PaintEventHandler (this.Paint);
+				//this.window.Paint += new PaintEventHandler (this.Paint);
 
 				this.window.Load += new EventHandler (this.StartGameThread);
 
@@ -90,14 +95,15 @@ namespace Aiv.Engine
             this.timer.SynchronizingObject = this.window;
             //this.timer.AutoReset = true;
 
-            //this.mainLoop = new Thread (new ThreadStart (this.GameLoop));
-            //this.mainLoop.SetApartmentState (ApartmentState.STA);
+            this.mainLoop = new Thread (new ThreadStart (this.GameLoop));
+            this.mainLoop.SetApartmentState (ApartmentState.STA);
 
         }
 
         private void Update(object sender, System.Timers.ElapsedEventArgs e)
         {
             //Console.WriteLine("Update()");
+
             int startTick = this.ticks;
 
             this.workingGraphics.Clear(Color.Black);
@@ -110,25 +116,33 @@ namespace Aiv.Engine
                     continue;
                 obj.Update();
             }
+
+            //Graphics g = this.window.CreateGraphics();
+            this.windowGraphics.DrawImageUnscaled(this.workingBitmap, 0, 0);
+            
             //this.window.Invalidate();
             //this.window.Update();
-            this.window.Refresh();
+            //this.window.Refresh();
         }
 
 		private void Paint(object sender, PaintEventArgs e) {
 
-            //Console.WriteLine("Draw");
+            Console.WriteLine("Draw");
             			
 			Graphics g = e.Graphics;
 
-			g.DrawImageUnscaled (this.workingBitmap, 0, 0);
+            
+
+            g.DrawImageUnscaled (this.workingBitmap, 0, 0);
+
+           
             
 		}
 
 		private void StartGameThread(object sender, EventArgs e) {
             this.isGameRunning = true;
-            this.timer.Start();
-			//this.mainLoop.Start ();
+            //this.timer.Start();
+			this.mainLoop.Start ();
 		}
 
 		public void DestroyAllObjects() {
@@ -172,8 +186,8 @@ namespace Aiv.Engine
 				// commit graphics updates
 				//this.window.up ();
 
-				//this.windowGraphics.DrawImageUnscaled (this.workingBitmap, 0, 0);
-				this.window.Invalidate ();
+				this.windowGraphics.DrawImageUnscaled (this.workingBitmap, 0, 0);
+				//this.window.Invalidate ();
 				//this.window.Update ();
 
 
