@@ -68,15 +68,16 @@ namespace Aiv.Engine
 			}
 		}
 
-
 		// this is called when the GameObject is allocated
-		public virtual void Start() {
+		public virtual void Start()
+		{
 			if (this.OnStart != null)
 				this.OnStart (this);
 		}
 
 		// this is called by the game loop at every cycle
-		public virtual void Update() {
+		public virtual void Update()
+		{
 			if (this.OnUpdate != null)
 				this.OnUpdate (this);
 		}

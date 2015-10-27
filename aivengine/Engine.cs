@@ -11,6 +11,8 @@ namespace Aiv.Engine
 		public Form window;
 		public int fps;
 
+		private PictureBox pbox;
+
 		public Dictionary<string, GameObject> objects;
 		public Dictionary<string, Asset> assets;
 
@@ -33,6 +35,7 @@ namespace Aiv.Engine
 		public Graphics workingGraphics;
 
 		private bool isGameRunning = false;
+		private System.Windows.Forms.Timer timer;
 
 		public Engine (string windowName, int width, int height, int fps)
 		{
@@ -45,11 +48,30 @@ namespace Aiv.Engine
 
 			//this.window.Paint += new PaintEventHandler (this.Paint);
 
-			this.window.Load += new EventHandler (this.StartGameThread);
+			//this.window.Load += new EventHandler (this.StartGameThread);
 
+			this.pbox = new PictureBox ();
+			//this.pbox = new Panel ();
+			this.pbox.Location = new Point (0, 0);
+			this.pbox.Size = new Size (width, height);
+			//this.pbox.
+			//this.pbox.Image = new Bitmap (width, height);
+			this.pbox.Paint += new PaintEventHandler (this.Paint);
+			//this.window.do
+
+
+			this.window.Controls.Add (pbox);
 
 			this.fps = fps;
 
+			this.timer = new System.Windows.Forms.Timer();
+			this.timer.Interval = 1000/this.fps;
+			this.timer.Tick += new EventHandler(this.Update);
+			this.timer.Start ();
+
+
+			//this.windowGraphics = Graphics.FromHwnd (this.pbox.Handle);
+			this.windowGraphics = this.pbox.CreateGraphics();
 			
 			this.workingBitmap = new Bitmap (width, height);
 			this.workingGraphics = Graphics.FromImage (this.workingBitmap);
@@ -64,13 +86,46 @@ namespace Aiv.Engine
 
 		}
 
+		private void Update(object sender, EventArgs e) {
+			//Console.WriteLine ("Draw()");
+			this.pbox.Invalidate ();
+		}
+
+		private void _Update(object sender, EventArgs e) {
+			this.pbox.Image = null;
+
+			this.workingGraphics.Clear (Color.Black);
+
+			//this.workingGraphics = g;
+
+			foreach (GameObject obj in this.objects.Values) {
+				if (!obj.enabled)
+					continue;
+				obj.Update ();
+			}
+
+			//this.pbox.Image = this.workingBitmap;
+		}
+
 		private void Paint(object sender, PaintEventArgs e) {
 			Console.WriteLine ("Paint()");
-			//this.windowGraphics = e.Graphics;
+			//this.windowGraphics = this.pbox.CreateGraphics ();//e.Graphics;
+			Graphics g = e.Graphics;
+			this.workingGraphics.Clear (Color.Black);
+
+			//this.workingGraphics = g;
+
+			foreach (GameObject obj in this.objects.Values) {
+				if (!obj.enabled)
+					continue;
+				obj.Update ();
+			}
+
+			g.DrawImage (this.workingBitmap, 0, 0);
 		}
 
 		private void StartGameThread(object sender, EventArgs e) {
-            this.windowGraphics = Graphics.FromHwnd(this.window.Handle);
+            //this.windowGraphics = Graphics.FromHwnd(this.window.Handle);
             this.isGameRunning = true;
 			this.mainLoop.Start ();
 		}
@@ -87,13 +142,17 @@ namespace Aiv.Engine
 			Application.Run (this.window);
 		}
 
-		[STAThread]
+
 		private void GameLoop() {
 			// compute update frequency
 			int freq = 1000/this.fps;
 			this.startTicks = this.ticks;
 
+			//this.windowGraphics = Graphics.FromHwnd(this.window.Handle);
+
 			while (isGameRunning) {
+				if (this.windowGraphics == null)
+					continue;
 				Console.WriteLine ("running " + this.ticks);
 				int startTick = this.ticks;
 
@@ -107,6 +166,13 @@ namespace Aiv.Engine
 
 				// commit graphics updates
 				this.windowGraphics.DrawImage (this.workingBitmap, 0, 0);
+
+				this.pbox.Refresh ();
+
+				//this.windowGraphics.Clear(Color.Black);
+				//this.windowGraphics.DrawEllipse (new Pen (Color.Red), 0, 0, 200, 200);
+				//Graphics.FromImage (this.pbox.Image).DrawImage (this.workingBitmap, 0, 0);
+				//this.pbox.Image = this.workingBitmap;
 
 				int endTick = this.ticks;
 
