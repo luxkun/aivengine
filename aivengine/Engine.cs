@@ -34,14 +34,21 @@ namespace Aiv.Engine
 
 		private bool isGameRunning = false;
 
+        class MainWindow : Form
+        {
+            public MainWindow()
+            {
+                DoubleBuffered = true;
+            }
+        }
 
 		public Engine (string windowName, int width, int height, int fps)
 		{
-			this.window = new Form ();
+			this.window = new MainWindow ();
 			this.window.Text = windowName;
 			this.window.Size = new Size (width, height);
 
-
+           
 
 			this.window.KeyDown += new KeyEventHandler (this.KeyDown);
 			this.window.KeyUp += new KeyEventHandler (this.KeyUp);
