@@ -39,7 +39,7 @@ namespace Aiv.Engine
 
 		private bool isGameRunning = false;
 
-        System.Timers.Timer timer;
+		System.Windows.Forms.Timer timer;
 
 		PictureBox pbox;
 
@@ -96,23 +96,26 @@ namespace Aiv.Engine
 			this.assets = new Dictionary<string, Asset> ();
 			this.keyboardTable = new Dictionary<Keys, bool> ();
 
-            this.timer = new System.Timers.Timer(1000 / this.fps);
-            this.timer.Elapsed += new System.Timers.ElapsedEventHandler(this.Update);
-            this.timer.SynchronizingObject = this.window;
+			this.timer = new System.Windows.Forms.Timer ();
+			this.timer.Interval = 1;
+			this.timer.Tick += new EventHandler (this.Update);
+            //this.timer.Elapsed += new System.Timers.ElapsedEventHandler(this.Update);
+            //this.timer.SynchronizingObject = this.window;
             //this.timer.AutoReset = true;
 
             this.mainLoop = new Thread (new ThreadStart (this.GameLoop));
             this.mainLoop.SetApartmentState (ApartmentState.STA);
 
-
-			Application.Idle += new EventHandler (this.Update);
+			this.lastTick = this.ticks;
+			//Application.Idle += new EventHandler (this.Update);
 
         }
 
 		int lastTick;
 
-		private void Update(object sender, EventArgs e)
-        //private void Update(object sender, System.Timers.ElapsedEventArgs e)
+		private void Update(object sender, EventArgs e) {
+		}
+        private void _Update(object sender, System.Timers.ElapsedEventArgs e)
         {
             //Console.WriteLine("Update()");
 
@@ -159,8 +162,8 @@ namespace Aiv.Engine
 
 		private void StartGameThread(object sender, EventArgs e) {
             this.isGameRunning = true;
-            //this.timer.Start();
-			//this.mainLoop.Start ();
+            this.timer.Start();
+			this.mainLoop.Start ();
 		}
 
 		public void DestroyAllObjects() {
@@ -210,7 +213,8 @@ namespace Aiv.Engine
 				//this.window.Invalidate ();
 				//this.window.Update ();
 
-				//this.pbox.Image = this.workingBitmap;
+				this.pbox.Image = this.workingBitmap;
+				this.pbox.Invalidate ();
 
 				int endTick = this.ticks;
 
