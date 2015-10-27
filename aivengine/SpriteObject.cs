@@ -14,7 +14,7 @@ namespace Aiv.Engine
 		public override void Update() {
 			base.Update();
 			if (this.currentSprite != null)
-				this.engine.workingGraphics.DrawImage (this.currentSprite.sprite, this.x, this.y);
+				this.engine.workingGraphics.DrawImageUnscaled (this.currentSprite.sprite, this.x, this.y);
 		}
 	}
 }

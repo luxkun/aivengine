@@ -29,11 +29,11 @@ namespace Aiv.Engine
 			}
 
 			if (to.engine.IsKeyDown(Keys.Up)) {
-				to.y -= 10;
+				to.y -= 5;
 			}
 
 			if (to.engine.IsKeyDown(Keys.Down)) {
-				to.y += 10;
+				to.y += 5;
 			}
 
 			to.currentSprite = (SpriteAsset) to.engine.GetAsset ("ship");
