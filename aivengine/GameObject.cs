@@ -8,6 +8,9 @@ namespace Aiv.Engine
 		public int x;
 		public int y;
 
+		// rendering order, lower values are rendered before
+		public int order;
+
 		public Engine engine;
 
         public int deltaTicks;
