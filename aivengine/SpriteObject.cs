@@ -7,8 +7,8 @@ namespace Aiv.Engine
 
 		public SpriteAsset currentSprite;
 
-		public override void Update() {
-			base.Update();
+		public override void Draw() {
+			base.Draw();
 			if (this.currentSprite != null)
 				this.engine.workingGraphics.DrawImageUnscaled (this.currentSprite.sprite, this.x, this.y);
 		}

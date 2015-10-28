@@ -157,7 +157,7 @@ namespace Aiv.Engine
                     obj.ticks = startTick;
 					if (!obj.enabled)
 						continue;
-					obj.Update ();
+					obj.Draw ();
 				}
 
 				// commit graphics updates
@@ -206,14 +206,11 @@ namespace Aiv.Engine
 		 */
 
 		public void SpawnObject(string name, GameObject obj) {
-			Console.WriteLine ("Spawning");
 			obj.name = name;
 			obj.engine = this;
 			obj.enabled = true;
-			Console.WriteLine ("Assigning object");
 			this.objects [name] = obj;
-			Console.WriteLine ("calling Start()");
-			obj.Start ();
+			obj.Initialize ();
 		}
 
 

@@ -18,8 +18,8 @@ namespace Aiv.Engine
 			this.brush = new SolidBrush (Color.FromName (colorName));
 		}
 			
-		public override void Update() {
-			base.Update();
+		public override void Draw() {
+			base.Draw();
 			// ensure empty text on null
 			string text = this.text;
 			if (text == null)
