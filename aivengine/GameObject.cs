@@ -92,6 +92,10 @@ namespace Aiv.Engine
 		public virtual void Update()
 		{
 		}
+
+
+		public void SetHitBox(int x, int y, int width, int height) {
+		}
 	}
 }
 
