@@ -9,7 +9,7 @@ namespace Aiv.Engine
 {
 	public class Engine
 	{
-		public Form window;
+		
 		public int fps;
 
 		public int width;
@@ -20,8 +20,6 @@ namespace Aiv.Engine
 
 		// this is constantly filled with keyboard status
 		private Dictionary<Keys, bool> keyboardTable;
-
-		private Thread mainLoop;
 
 		public int startTicks;
 
@@ -35,26 +33,38 @@ namespace Aiv.Engine
 		private Bitmap workingBitmap;
 		public Graphics workingGraphics;
 
-		private Graphics windowGraphics;
-
 		private bool isGameRunning = false;
-
-		System.Windows.Forms.Timer timer;
-
-		PictureBox pbox;
 
         class MainWindow : Form
         {
+
+			public Graphics windowGraphics;
+			public PictureBox pbox;
+
             public MainWindow()
             {
-                //DoubleBuffered = true;
+
+				StartPosition = FormStartPosition.CenterScreen;
+				FormBorderStyle = FormBorderStyle.FixedSingle;
+				MaximizeBox = false;
+				MinimizeBox = false;
+
+                
                 this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
                 this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
                 this.SetStyle(ControlStyles.UserPaint, false);
                 this.SetStyle(ControlStyles.FixedWidth, true);
                 this.SetStyle(ControlStyles.FixedHeight, true);
+
+				this.pbox = new PictureBox();
+				pbox.Dock = DockStyle.Fill;
+				this.Controls.Add(pbox);
+
+				this.windowGraphics = pbox.CreateGraphics();
             }
         }
+
+		MainWindow window;
 
 		public Engine (string windowName, int width, int height, int fps)
 		{
@@ -73,15 +83,15 @@ namespace Aiv.Engine
 
 				//this.window.Paint += new PaintEventHandler (this.Paint);
 
-				this.window.Load += new EventHandler (this.StartGameThread);
+				//this.window.Load += new EventHandler (this.StartGameThread);
 
             
 
-            this.windowGraphics = Graphics.FromHwnd(this.window.Handle);
+            
 
-			this.pbox = new PictureBox ();
-			this.pbox.Dock = DockStyle.Fill;
-			this.window.Controls.Add (pbox);
+			//this.pbox = new PictureBox ();
+			//this.pbox.Dock = DockStyle.Fill;
+			//this.window.Controls.Add (pbox);
 
 
             this.fps = fps;
@@ -96,75 +106,16 @@ namespace Aiv.Engine
 			this.assets = new Dictionary<string, Asset> ();
 			this.keyboardTable = new Dictionary<Keys, bool> ();
 
-			this.timer = new System.Windows.Forms.Timer ();
-			this.timer.Interval = 1;
-			this.timer.Tick += new EventHandler (this.Update);
+			//this.timer = new System.Windows.Forms.Timer ();
+			//this.timer.Interval = 1;
+			//this.timer.Tick += new EventHandler (this.Update);
             //this.timer.Elapsed += new System.Timers.ElapsedEventHandler(this.Update);
             //this.timer.SynchronizingObject = this.window;
             //this.timer.AutoReset = true;
 
-            this.mainLoop = new Thread (new ThreadStart (this.GameLoop));
-            this.mainLoop.SetApartmentState (ApartmentState.STA);
-
-			this.lastTick = this.ticks;
-			//Application.Idle += new EventHandler (this.Update);
-
-        }
-
-		int lastTick;
-
-		private void Update(object sender, EventArgs e) {
+         
 		}
-        private void _Update(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            //Console.WriteLine("Update()");
-
-			if (this.ticks - lastTick < 1000 / this.fps)
-				return;
-			lastTick = this.ticks;
-
-			int startTick = lastTick;
-
-            this.workingGraphics.Clear(Color.Black);
-
-            foreach (GameObject obj in this.objects.Values)
-            {
-                obj.deltaTicks = startTick - obj.ticks;
-                obj.ticks = startTick;
-                if (!obj.enabled)
-                    continue;
-                obj.Update();
-            }
-
-            //Graphics g = this.window.CreateGraphics();
-            //this.windowGraphics.DrawImageUnscaled(this.workingBitmap, 0, 0);
-
-			this.pbox.Image = this.workingBitmap;
-            
-            //this.window.Invalidate();
-            //this.window.Update();
-            //this.window.Refresh();
-        }
-
-		private void Paint(object sender, PaintEventArgs e) {
-
-            Console.WriteLine("Draw");
-            			
-			Graphics g = e.Graphics;
-
-            
-
-            g.DrawImageUnscaled (this.workingBitmap, 0, 0);
-
-           
-            
-		}
-
-		private void StartGameThread(object sender, EventArgs e) {
-            this.isGameRunning = true;
-            this.timer.Start();
-			this.mainLoop.Start ();
-		}
+			
 
 		public void DestroyAllObjects() {
 			foreach (GameObject obj in this.objects.Values) {
@@ -175,13 +126,11 @@ namespace Aiv.Engine
 		}
 
 		public void Run() {
+
+			this.window.Show ();
+
+			isGameRunning = true;
             
-			Application.Run (this.window);
-
-		}
-
-
-		private void GameLoop() {
 			// compute update frequency
 			int freq = 1000/this.fps;
 			this.startTicks = this.ticks;
@@ -193,6 +142,8 @@ namespace Aiv.Engine
 			while (isGameRunning) {
 				
 				int startTick = this.ticks;
+
+				Application.DoEvents ();
 
 				this.workingGraphics.Clear (Color.Black);
 
@@ -213,8 +164,10 @@ namespace Aiv.Engine
 				//this.window.Invalidate ();
 				//this.window.Update ();
 
-				this.pbox.Image = this.workingBitmap;
-				this.pbox.Invalidate ();
+				this.window.pbox.Image = this.workingBitmap;
+				//this.pbox.Invalidate ();
+
+				//this.window.windowGraphics.DrawImageUnscaled (this.workingBitmap, 0, 0);
 
 				int endTick = this.ticks;
 
