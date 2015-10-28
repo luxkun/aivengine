@@ -117,12 +117,6 @@ namespace Aiv.Engine
 			this.assets = new Dictionary<string, Asset> ();
 			this.keyboardTable = new Dictionary<Keys, bool> ();
 
-			//this.timer = new System.Windows.Forms.Timer ();
-			//this.timer.Interval = 1;
-			//this.timer.Tick += new EventHandler (this.Update);
-            //this.timer.Elapsed += new System.Timers.ElapsedEventHandler(this.Update);
-            //this.timer.SynchronizingObject = this.window;
-            //this.timer.AutoReset = true;
 
          
 		}

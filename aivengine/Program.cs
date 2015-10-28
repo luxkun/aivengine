@@ -46,12 +46,14 @@ namespace Aiv.Engine
         
 		static void Main(string []args) {
 			Engine engine = new Engine ("Shooter", 1024, 768, 30);
-			TextObject to = new TextObject (10, 10, "Hello World", "Arial", 17, "red");
+			TextObject to = new TextObject ("Arial", 17, "red");
 			to.OnUpdate += new GameObject.UpdateEventHandler (Behaviours.MoveText);
-
+			to.x = 10;
+			to.y = 10;
+			to.text = "Hello World";
 			engine.LoadAsset ("ship", new SpriteAsset("../../Assets/blueship.png"));
 
-			SpriteObject ship = new SpriteObject (10, 10);
+			SpriteObject ship = new SpriteObject ();
 			ship.OnUpdate += new GameObject.UpdateEventHandler (Behaviours.MoveSprite);
 
 			engine.SpawnObject ("Ship", ship);

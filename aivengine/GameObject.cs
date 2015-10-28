@@ -55,10 +55,10 @@ namespace Aiv.Engine
 		public event DisableEventHandler OnDisable;
 
 
-		public GameObject (int x, int y)
+		public GameObject ()
 		{
-			this.x = x;
-			this.y = y;
+			this.x = 0;
+			this.y = 0;
 		}
 
 		public void Destroy() {
