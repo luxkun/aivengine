@@ -22,19 +22,19 @@ namespace Aiv.Engine
 		public static void Move(object sender) {
 			GameObject obj = (GameObject)sender;
 			if (obj.engine.IsKeyDown(Keys.Right)) {
-				obj.x += 5;
+				obj.x += 10;
 			}
 
 			if (obj.engine.IsKeyDown(Keys.Left)) {
-				obj.x -= 5;
+				obj.x -= 10;
 			}
 
 			if (obj.engine.IsKeyDown(Keys.Up)) {
-				obj.y -= 5;
+				obj.y -= 10;
 			}
 
 			if (obj.engine.IsKeyDown(Keys.Down)) {
-				obj.y += 5;
+				obj.y += 10;
 			}
 		}
 
