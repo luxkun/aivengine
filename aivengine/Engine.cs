@@ -3,6 +3,8 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Drawing;
 using System.Collections.Generic;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 
 
 namespace Aiv.Engine
@@ -61,6 +63,12 @@ namespace Aiv.Engine
 				this.Controls.Add(pbox);
 
 				this.windowGraphics = pbox.CreateGraphics();
+				this.windowGraphics.CompositingMode = CompositingMode.SourceCopy;
+				this.windowGraphics.CompositingQuality = CompositingQuality.HighSpeed;
+				this.windowGraphics.SmoothingMode = SmoothingMode.None;
+				this.windowGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+				this.windowGraphics.TextRenderingHint = TextRenderingHint.SystemDefault;
+				this.windowGraphics.PixelOffsetMode = PixelOffsetMode.HighSpeed;
             }
         }
 
@@ -100,6 +108,9 @@ namespace Aiv.Engine
 			
 			this.workingBitmap = new Bitmap (width, height);
 			this.workingGraphics = Graphics.FromImage (this.workingBitmap);
+			this.workingGraphics.CompositingQuality = CompositingQuality.HighSpeed;
+			this.workingGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+			this.workingGraphics.PixelOffsetMode = PixelOffsetMode.HighSpeed;
 
 			// create dictionaries
 			this.objects = new Dictionary<string, GameObject> ();
