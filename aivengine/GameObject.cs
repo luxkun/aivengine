@@ -67,7 +67,7 @@ namespace Aiv.Engine
 				OnDestroy (this);
 			
 			if (this.engine != null) {
-				this.engine.objects.Remove (this.name);
+				this.engine.RemoveObject (this);
 			}
 		}
 

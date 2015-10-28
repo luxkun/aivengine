@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace Aiv.Engine
 {
@@ -39,6 +40,40 @@ namespace Aiv.Engine
 
 	}
 
+	public class Bullet : CircleObject {
+		public override void Update() {
+			this.x += 30;
+			if (this.x > this.engine.width) {
+				this.Destroy ();
+			}
+		}
+	}
+
+	public class SpaceShip : SpriteObject {
+
+		int lastShot = 0;
+		int bulletCounter = 0;
+		
+		public override void Update ()
+		{
+			if (lastShot > 0) {
+				lastShot -= this.deltaTicks;
+			}
+
+			if (lastShot <= 0 && this.engine.IsKeyDown(Keys.Space)) {
+				// spawn a new bullet
+				Bullet bullet = new Bullet();
+				bullet.x = this.x + this.width;
+				bullet.y = this.y + (this.height/2);
+				bullet.radius = 5;
+				bullet.color = Color.Red;
+				this.engine.SpawnObject("bullet_" + bulletCounter, bullet);
+				bulletCounter++;
+				lastShot = 200;
+			}
+		}
+	}
+
 	public class Program
 	{
         
@@ -51,7 +86,7 @@ namespace Aiv.Engine
 			to.text = "Hello World";
 			engine.LoadAsset ("ship", new SpriteAsset("../../Assets/blueship.png"));
 
-			SpriteObject ship = new SpriteObject ();
+			SpaceShip ship = new SpaceShip ();
 			ship.currentSprite = (SpriteAsset) engine.GetAsset ("ship");
 			ship.OnUpdate += new GameObject.UpdateEventHandler (Behaviours.Move);
 

@@ -23,6 +23,8 @@ namespace Aiv.Engine
 		// this is constantly filled with keyboard status
 		private Dictionary<Keys, bool> keyboardTable;
 
+		private List<GameObject> objectsToRender;
+
 		public int startTicks;
 
 		public int ticks {
@@ -31,6 +33,8 @@ namespace Aiv.Engine
 			}
 		}
 			
+		// when true the renderling list must be rebuilt
+		bool dirtyObjects;
 
 		private Bitmap workingBitmap;
 		public Graphics workingGraphics;
@@ -114,6 +118,7 @@ namespace Aiv.Engine
 
 			// create dictionaries
 			this.objects = new Dictionary<string, GameObject> ();
+			this.objectsToRender = new List<GameObject> ();
 			this.assets = new Dictionary<string, Asset> ();
 			this.keyboardTable = new Dictionary<Keys, bool> ();
 
@@ -152,7 +157,7 @@ namespace Aiv.Engine
 
 				this.workingGraphics.Clear (Color.Black);
 
-				foreach (GameObject obj in this.objects.Values) {
+				foreach (GameObject obj in this.objectsToRender) {
                     obj.deltaTicks = startTick - obj.ticks;
                     obj.ticks = startTick;
 					if (!obj.enabled)
@@ -173,6 +178,15 @@ namespace Aiv.Engine
 				//this.pbox.Invalidate ();
 
 				//this.window.windowGraphics.DrawImageUnscaled (this.workingBitmap, 0, 0);
+
+				// TODO optimize this to respect ordering
+				if (this.dirtyObjects) {
+					this.objectsToRender.Clear ();
+					foreach (GameObject obj in this.objects.Values) {
+						this.objectsToRender.Add (obj);
+					}
+					this.dirtyObjects = false;
+				}
 
 				int endTick = this.ticks;
 
@@ -211,8 +225,14 @@ namespace Aiv.Engine
 			obj.enabled = true;
 			this.objects [name] = obj;
 			obj.Initialize ();
+			// force the rendering list to be rebuilt
+			this.dirtyObjects = true;
 		}
 
+		public void RemoveObject(GameObject obj) {
+			this.objects.Remove (obj.name);
+			this.dirtyObjects = true;
+		}
 
 		/*
 		 * 
