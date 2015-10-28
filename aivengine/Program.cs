@@ -18,25 +18,23 @@ namespace Aiv.Engine
 			to.text = to.deltaTicks.ToString();
 		}
 
-		public static void MoveSprite(object sender) {
-			SpriteObject to = (SpriteObject)sender;
-			if (to.engine.IsKeyDown(Keys.Right)) {
-				to.x += 5;
+		public static void Move(object sender) {
+			GameObject obj = (GameObject)sender;
+			if (obj.engine.IsKeyDown(Keys.Right)) {
+				obj.x += 5;
 			}
 
-			if (to.engine.IsKeyDown(Keys.Left)) {
-				to.x -= 5;
+			if (obj.engine.IsKeyDown(Keys.Left)) {
+				obj.x -= 5;
 			}
 
-			if (to.engine.IsKeyDown(Keys.Up)) {
-				to.y -= 5;
+			if (obj.engine.IsKeyDown(Keys.Up)) {
+				obj.y -= 5;
 			}
 
-			if (to.engine.IsKeyDown(Keys.Down)) {
-				to.y += 5;
+			if (obj.engine.IsKeyDown(Keys.Down)) {
+				obj.y += 5;
 			}
-
-			to.currentSprite = (SpriteAsset) to.engine.GetAsset ("ship");
 		}
 
 	}
@@ -54,7 +52,8 @@ namespace Aiv.Engine
 			engine.LoadAsset ("ship", new SpriteAsset("../../Assets/blueship.png"));
 
 			SpriteObject ship = new SpriteObject ();
-			ship.OnUpdate += new GameObject.UpdateEventHandler (Behaviours.MoveSprite);
+			ship.currentSprite = (SpriteAsset) engine.GetAsset ("ship");
+			ship.OnUpdate += new GameObject.UpdateEventHandler (Behaviours.Move);
 
 			engine.SpawnObject ("Ship", ship);
 
