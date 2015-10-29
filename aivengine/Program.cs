@@ -145,7 +145,7 @@ namespace Aiv.Engine
 
 
 			TextObject to = new TextObject ("Arial", 17, "red");
-			to.OnUpdate += new GameObject.UpdateEventHandler (Behaviours.MoveText);
+			//to.OnUpdate += new GameObject.UpdateEventHandler (Behaviours.MoveText);
 			to.x = 10;
 			to.y = 10;
 			to.text = "Hello World";

@@ -105,6 +105,7 @@ namespace Aiv.Engine
 				this.hitBoxes = new Dictionary<string, HitBox> ();
 			}
 			HitBox hbox = new HitBox (name, x, y, width, height);
+			hbox.owner = this;
 			this.hitBoxes [name] = hbox;
 		}
 				
@@ -114,6 +115,7 @@ namespace Aiv.Engine
 			public int y;
 			public int width;
 			public int height;
+			public GameObject owner;
 
 			public HitBox(string name, int x, int y, int width, int height)
 			{
@@ -126,7 +128,18 @@ namespace Aiv.Engine
 			}
 
 			public bool CollideWith(HitBox other) {
-				return true;
+				int x1 = this.owner.x + this.x;
+				int y1 = this.owner.y + this.y;
+				int x2 = other.owner.x + other.x;
+				int y2 = other.owner.y + other.y;
+				// simple rectangle collision check
+				if (x1 + this.width >= x2 &&
+				    x1 <= (x2 + other.width) &&
+				    y1 + this.height >= y2 &&
+				    y1 <= (y2 + other.height))
+					return true;
+				// no collision
+				return false;
 			}
 		}
 
