@@ -8,12 +8,14 @@ namespace Aiv.Engine
 	public class SpriteObject : GameObject
 	{
 
-		class Animation {
+		public class Animation {
 			public int fps;
 			public List<SpriteAsset> sprites;
 			public int currentFrame;
 			public int lastTick;
 			public bool loop;
+			public bool oneShot;
+			public SpriteObject owner;
 		}
 
 		private Dictionary<string, Animation> animations;
@@ -52,7 +54,11 @@ namespace Aiv.Engine
 				if (animation.currentFrame >= lastFrame) {
 					if (animation.loop) {
 						animation.currentFrame = 0;
-					} else {
+					} else if (animation.oneShot) {
+						// disable drawing
+						animation.owner.currentAnimation = null;
+						return;
+					}else {
 						// block to the last frame
 						animation.currentFrame = lastFrame;
 					}
@@ -76,7 +82,7 @@ namespace Aiv.Engine
 			}
 		}
 
-		public void AddAnimation(string name, IEnumerable<string> assets, int fps, bool loop=false) {
+		public Animation AddAnimation(string name, IEnumerable<string> assets, int fps) {
 			// allocate animations dictionary on demand
 			if (this.animations == null) {
 				this.animations = new Dictionary<string, Animation> ();
@@ -90,8 +96,11 @@ namespace Aiv.Engine
 			animation.currentFrame = 0;
 			// force the first frame to be drawn
 			animation.lastTick = 0;
-			animation.loop = loop;
+			animation.loop = false;
+			animation.oneShot = false;
+			animation.owner = this;
 			this.animations [name] = animation;
+			return animation;
 		}
 	}
 }
