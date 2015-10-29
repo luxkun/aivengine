@@ -190,9 +190,10 @@ namespace Aiv.Engine
 
 			if (lastAsteroidSpawn <= 0) {
 				Asteroid asteroid = new Asteroid ();
-				asteroid.x = this.engine.width;
-				asteroid.y = this.engine.Random (30, this.engine.height - 30);
+
 				this.engine.SpawnObject("asteroid_" + asteroidsCounter, asteroid);
+				asteroid.x = this.engine.width;
+				asteroid.y = this.engine.Random (asteroid.height, this.engine.height - asteroid.height);
 				asteroidsCounter++;
 				lastAsteroidSpawn = 2000;
 			}

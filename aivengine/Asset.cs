@@ -1,9 +1,12 @@
 ﻿using System;
+using System.IO;
 
 namespace Aiv.Engine
 {
 	public class Asset
 	{
+
+		public static string basePath = "";
 
 		public string name;
 		public string fileName;
@@ -11,7 +14,7 @@ namespace Aiv.Engine
 
 		public Asset (string fileName)
 		{
-			this.fileName = fileName;
+			this.fileName = Path.Combine(basePath, fileName);
 		}
 	}
 }

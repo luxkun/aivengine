@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration ("")]
 [assembly: AssemblyCompany ("")]
 [assembly: AssemblyProduct ("")]
-[assembly: AssemblyCopyright ("20tab")]
+[assembly: AssemblyCopyright ("20Tab S.r.l., AIV s.r.l.")]
 [assembly: AssemblyTrademark ("")]
 [assembly: AssemblyCulture ("")]
 
