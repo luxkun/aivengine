@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Collections.Generic;
 
 namespace Aiv.Engine
 {
@@ -44,6 +45,7 @@ namespace Aiv.Engine
 
 		public override void Start() {
 			this.order = 2;
+			this.AddHitBox ("mass", 0, 0, 10, 10);
 		}
 
 		public override void Update() {
@@ -58,6 +60,11 @@ namespace Aiv.Engine
 
 		int lastShot = 0;
 		int bulletCounter = 0;
+
+		public override void Start()
+		{
+			this.AddHitBox ("chassis", 2, 0, 58, 46);
+		}
 		
 		public override void Update ()
 		{
@@ -76,6 +83,12 @@ namespace Aiv.Engine
 				bulletCounter++;
 				lastShot = 200;
 			}
+
+			List<Collision> collisions = this.CheckCollisions ();
+			if (collisions.Count > 0) {
+				TextObject to = (TextObject)this.engine.objects ["Text"];
+				to.text = string.Format("Game Over, collided with {0}", collisions[0].other.name);
+			}
 		}
 	}
 
@@ -85,6 +98,8 @@ namespace Aiv.Engine
 			this.AddAnimation("idle", frames, 6, true);
 			this.currentAnimation = "idle";
 			this.order = 1;
+
+			this.AddHitBox ("rock", 0, 0, 128, 128);
 		}
 
 		public override void Update() {
@@ -121,6 +136,7 @@ namespace Aiv.Engine
         
 		static void Main(string []args) {
 			Engine engine = new Engine ("Shooter", 1024, 768, 30);
+			engine.debugCollisions = true;
 
 
 			// add the gameplay object, it governs the game logic

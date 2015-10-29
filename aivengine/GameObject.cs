@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Aiv.Engine
 {
@@ -15,6 +16,8 @@ namespace Aiv.Engine
 
         public int deltaTicks;
         public int ticks;
+
+		public Dictionary<string, HitBox> hitBoxes;
 
 		private bool _enabled = false;
 		public bool enabled {
@@ -97,8 +100,74 @@ namespace Aiv.Engine
 		}
 
 
-		public void SetHitBox(int x, int y, int width, int height) {
+		public void AddHitBox(string name, int x, int y, int width, int height) {
+			if (this.hitBoxes == null) {
+				this.hitBoxes = new Dictionary<string, HitBox> ();
+			}
+			HitBox hbox = new HitBox (name, x, y, width, height);
+			this.hitBoxes [name] = hbox;
 		}
+				
+		public class HitBox {
+			public string name;
+			public int x;
+			public int y;
+			public int width;
+			public int height;
+
+			public HitBox(string name, int x, int y, int width, int height)
+			{
+				this.name = name;
+				this.x = x;
+				this.y = y;
+				this.width = width;
+				this.height = height;
+
+			}
+
+			public bool CollideWith(HitBox other) {
+				return true;
+			}
+		}
+
+		public class Collision {
+			public string hitBox;
+			public GameObject other;
+			public string otherHitBox;
+
+			public Collision(string hitBoxName, GameObject other, string otherHitBoxName) {
+				this.hitBox = hitBoxName;
+				this.other = other;
+				this.otherHitBox = otherHitBoxName;
+			}
+		}
+
+		// check with all objects
+		public List<Collision> CheckCollisions() {
+			if (this.hitBoxes == null) {
+				throw new Exception ("GameObject without hitboxes");
+			}
+			List<Collision> collisions = new List<Collision> ();
+			foreach (GameObject obj in this.engine.objects.Values) {
+				if (!obj.enabled)
+					continue;
+				// ignore myself
+				if (obj == this)
+					continue;
+				if (obj.hitBoxes == null)
+					continue;
+				foreach (HitBox hitBox in this.hitBoxes.Values) {
+					foreach (HitBox otherHitBox in obj.hitBoxes.Values) {
+						if (hitBox.CollideWith (otherHitBox)) {
+							Collision collision = new Collision (hitBox.name, obj, otherHitBox.name);
+							collisions.Add (collision);
+						}
+					}
+				}
+			}
+			return collisions;
+		}
+
 	}
 }
 

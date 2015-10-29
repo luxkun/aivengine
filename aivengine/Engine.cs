@@ -43,6 +43,8 @@ namespace Aiv.Engine
 
 		private Random random;
 
+		public bool debugCollisions;
+
         class MainWindow : Form
         {
 
@@ -165,6 +167,14 @@ namespace Aiv.Engine
 					if (!obj.enabled)
 						continue;
 					obj.Draw ();
+					if (this.debugCollisions) {
+						Pen green = new Pen (Color.Green);
+						if (obj.hitBoxes != null) {
+							foreach (GameObject.HitBox hitBox in obj.hitBoxes.Values) {
+								this.workingGraphics.DrawRectangle(green, obj.x + hitBox.x, obj.y + hitBox.y, hitBox.width, hitBox.height);
+							}
+						}
+					}
 				}
 
 				// commit graphics updates
