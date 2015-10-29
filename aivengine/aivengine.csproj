@@ -41,6 +41,7 @@
     <Compile Include="SpriteAsset.cs" />
     <Compile Include="TextObject.cs" />
     <Compile Include="CircleObject.cs" />
+    <Compile Include="RectangleObject.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup />
