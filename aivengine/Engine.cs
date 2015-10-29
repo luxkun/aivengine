@@ -34,10 +34,12 @@ namespace Aiv.Engine
 			}
 		}
 
-		public delegate void BeforeUpdateEventHandler(object sender);
+		public delegate void BeforeUpdateEventHandler (object sender);
+
 		public event BeforeUpdateEventHandler OnBeforeUpdate;
 
-		public delegate void AfterUpdateEventHandler(object sender);
+		public delegate void AfterUpdateEventHandler (object sender);
+
 		public event AfterUpdateEventHandler OnAfterUpdate;
 
 			
@@ -53,14 +55,14 @@ namespace Aiv.Engine
 
 		public bool debugCollisions;
 
-        class MainWindow : Form
-        {
+		class MainWindow : Form
+		{
 
 			public Graphics windowGraphics;
 			public PictureBox pbox;
 
-            public MainWindow()
-            {
+			public MainWindow ()
+			{
 
 				StartPosition = FormStartPosition.CenterScreen;
 				FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -68,25 +70,25 @@ namespace Aiv.Engine
 				MinimizeBox = false;
 
                 
-                this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-                this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-                this.SetStyle(ControlStyles.UserPaint, false);
-                this.SetStyle(ControlStyles.FixedWidth, true);
-                this.SetStyle(ControlStyles.FixedHeight, true);
+				this.SetStyle (ControlStyles.AllPaintingInWmPaint, true);
+				this.SetStyle (ControlStyles.OptimizedDoubleBuffer, true);
+				this.SetStyle (ControlStyles.UserPaint, false);
+				this.SetStyle (ControlStyles.FixedWidth, true);
+				this.SetStyle (ControlStyles.FixedHeight, true);
 
-				this.pbox = new PictureBox();
+				this.pbox = new PictureBox ();
 				pbox.Dock = DockStyle.Fill;
-				this.Controls.Add(pbox);
+				this.Controls.Add (pbox);
 
-				this.windowGraphics = pbox.CreateGraphics();
+				this.windowGraphics = pbox.CreateGraphics ();
 				this.windowGraphics.CompositingMode = CompositingMode.SourceCopy;
 				this.windowGraphics.CompositingQuality = CompositingQuality.HighSpeed;
 				this.windowGraphics.SmoothingMode = SmoothingMode.None;
 				this.windowGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
 				this.windowGraphics.TextRenderingHint = TextRenderingHint.SystemDefault;
 				this.windowGraphics.PixelOffsetMode = PixelOffsetMode.HighSpeed;
-            }
-        }
+			}
+		}
 
 		MainWindow window;
 
@@ -96,32 +98,17 @@ namespace Aiv.Engine
 			this.height = height;
 
 
-				this.window = new MainWindow ();
-				this.window.Text = windowName;
-				this.window.Size = new Size (width, height);
+			this.window = new MainWindow ();
+			this.window.Text = windowName;
+			this.window.Size = new Size (width, height);
 
 
 
-				this.window.KeyDown += new KeyEventHandler (this.KeyDown);
-				this.window.KeyUp += new KeyEventHandler (this.KeyUp);
+			this.window.KeyDown += new KeyEventHandler (this.KeyDown);
+			this.window.KeyUp += new KeyEventHandler (this.KeyUp);
 
-				//this.window.Paint += new PaintEventHandler (this.Paint);
+			this.fps = fps;
 
-				//this.window.Load += new EventHandler (this.StartGameThread);
-
-            
-
-            
-
-			//this.pbox = new PictureBox ();
-			//this.pbox.Dock = DockStyle.Fill;
-			//this.window.Controls.Add (pbox);
-
-
-            this.fps = fps;
-
-
-			
 			this.workingBitmap = new Bitmap (width, height);
 			this.workingGraphics = Graphics.FromImage (this.workingBitmap);
 			this.workingGraphics.CompositingQuality = CompositingQuality.HighSpeed;
@@ -137,9 +124,10 @@ namespace Aiv.Engine
 			this.random = new Random ();
          
 		}
-			
 
-		public void DestroyAllObjects() {
+
+		public void DestroyAllObjects ()
+		{
 			foreach (GameObject obj in this.objects.Values) {
 				obj.Destroy ();
 			}
@@ -147,14 +135,15 @@ namespace Aiv.Engine
 			this.objects.Clear ();
 		}
 
-		public void Run() {
+		public void Run ()
+		{
 
 			this.window.Show ();
 
 			isGameRunning = true;
             
 			// compute update frequency
-			int freq = 1000/this.fps;
+			int freq = 1000 / this.fps;
 			this.startTicks = this.ticks;
 
 			
@@ -173,8 +162,8 @@ namespace Aiv.Engine
 				this.workingGraphics.Clear (Color.Black);
 
 				foreach (GameObject obj in this.objectsToRender) {
-                    obj.deltaTicks = startTick - obj.ticks;
-                    obj.ticks = startTick;
+					obj.deltaTicks = startTick - obj.ticks;
+					obj.ticks = startTick;
 					if (!obj.enabled)
 						continue;
 					obj.Draw ();
@@ -182,7 +171,7 @@ namespace Aiv.Engine
 						Pen green = new Pen (Color.Green);
 						if (obj.hitBoxes != null) {
 							foreach (GameObject.HitBox hitBox in obj.hitBoxes.Values) {
-								this.workingGraphics.DrawRectangle(green, obj.x + hitBox.x, obj.y + hitBox.y, hitBox.width, hitBox.height);
+								this.workingGraphics.DrawRectangle (green, obj.x + hitBox.x, obj.y + hitBox.y, hitBox.width, hitBox.height);
 							}
 						}
 					}
@@ -191,21 +180,8 @@ namespace Aiv.Engine
 				if (this.OnAfterUpdate != null)
 					OnAfterUpdate (this);
 
-				// commit graphics updates
-				//this.window.up ();
-
-				//Graphics g = this.window.CreateGraphics ();
-
-				//g.DrawImageUnscaled (this.workingBitmap, 0, 0);
-				//this.window.Invalidate ();
-				//this.window.Update ();
-
 				this.window.pbox.Image = this.workingBitmap;
-				//this.pbox.Invalidate ();
 
-				//this.window.windowGraphics.DrawImageUnscaled (this.workingBitmap, 0, 0);
-
-				// TODO optimize this to respect ordering
 				if (this.dirtyObjects) {
 					this.objectsToRender.Clear ();
 					foreach (GameObject obj in this.objects.Values.OrderBy(o=>o.order)) {
@@ -218,7 +194,6 @@ namespace Aiv.Engine
 
 				// check if we need to slowdown
 				if (endTick - startTick < freq) {
-					//Console.WriteLine (freq - (endTick - startTick));
 					Thread.Sleep (freq - (endTick - startTick));
 				}
 			}
@@ -230,12 +205,14 @@ namespace Aiv.Engine
 		 * 
 		 */
 
-		public void LoadAsset(string name, Asset asset) {
+		public void LoadAsset (string name, Asset asset)
+		{
 			asset.engine = this;
 			this.assets [name] = asset;
 		}
 
-		public Asset GetAsset(string name) {
+		public Asset GetAsset (string name)
+		{
 			return this.assets [name];
 		}
 
@@ -245,7 +222,8 @@ namespace Aiv.Engine
 		 * 
 		 */
 
-		public void SpawnObject(string name, GameObject obj) {
+		public void SpawnObject (string name, GameObject obj)
+		{
 			obj.name = name;
 			obj.engine = this;
 			obj.enabled = true;
@@ -255,7 +233,8 @@ namespace Aiv.Engine
 			this.dirtyObjects = true;
 		}
 
-		public void RemoveObject(GameObject obj) {
+		public void RemoveObject (GameObject obj)
+		{
 			this.objects.Remove (obj.name);
 			this.dirtyObjects = true;
 		}
@@ -267,16 +246,19 @@ namespace Aiv.Engine
 		 *
 		 */
 
-		public int Random(int start, int end) {
+		public int Random (int start, int end)
+		{
 			return this.random.Next (start, end);
 		}
 
-		public void PlaySound(string assetName) {
+		public void PlaySound (string assetName)
+		{
 			SoundPlayer soundPlayer = new SoundPlayer (this.GetAsset (assetName).fileName);
 			soundPlayer.Play ();
 		}
 
-		public void PlaySoundLoop(string assetName) {
+		public void PlaySoundLoop (string assetName)
+		{
 			SoundPlayer soundPlayer = new SoundPlayer (this.GetAsset (assetName).fileName);
 			soundPlayer.PlayLooping ();
 		}
@@ -287,15 +269,18 @@ namespace Aiv.Engine
 		 * 
 		 */
 
-		private void KeyDown(object sender, KeyEventArgs e) {
+		private void KeyDown (object sender, KeyEventArgs e)
+		{
 			this.keyboardTable [e.KeyCode] = true;
 		}
 
-		private void KeyUp(object sender, KeyEventArgs e) {
+		private void KeyUp (object sender, KeyEventArgs e)
+		{
 			this.keyboardTable [e.KeyCode] = false;
 		}
 
-		public bool IsKeyDown(Keys key) {
+		public bool IsKeyDown (Keys key)
+		{
 			if (!keyboardTable.ContainsKey (key)) {
 				return false;
 			}
