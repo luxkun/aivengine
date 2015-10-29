@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
-
+using System.Linq;
 
 namespace Aiv.Engine
 {
@@ -182,7 +182,7 @@ namespace Aiv.Engine
 				// TODO optimize this to respect ordering
 				if (this.dirtyObjects) {
 					this.objectsToRender.Clear ();
-					foreach (GameObject obj in this.objects.Values) {
+					foreach (GameObject obj in this.objects.Values.OrderBy(o=>o.order)) {
 						this.objectsToRender.Add (obj);
 					}
 					this.dirtyObjects = false;

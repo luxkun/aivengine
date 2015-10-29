@@ -41,6 +41,11 @@ namespace Aiv.Engine
 	}
 
 	public class Bullet : CircleObject {
+
+		public override void Start() {
+			this.order = 1;
+		}
+
 		public override void Update() {
 			this.x += 30;
 			if (this.x > this.engine.width) {
