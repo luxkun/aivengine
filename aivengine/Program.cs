@@ -2,7 +2,7 @@
 using System.Windows.Forms;
 using System.Drawing;
 using System.Collections.Generic;
-using ChipmunkSharp;
+//using ChipmunkSharp;
 using System.Media;
 
 namespace Aiv.Engine
@@ -44,7 +44,7 @@ namespace Aiv.Engine
 		public static void StepPhysics(object sender) {
 			Engine engine = (Engine)sender;
 			GamePlay game = (GamePlay) engine.objects ["game"];
-			game.space.Step (1f / engine.fps);
+			//game.space.Step (1f / engine.fps);
 		}
 
 	}
@@ -69,6 +69,7 @@ namespace Aiv.Engine
 					explosion.x = collisions [0].other.x;
 					explosion.y = collisions [0].other.y;
 					this.engine.SpawnObject ("explosion__", explosion);
+                    this.engine.PlaySound("boom");
 					collisions [0].other.Destroy ();
 					this.Destroy ();
 					break;
@@ -82,7 +83,7 @@ namespace Aiv.Engine
 		int lastShot = 0;
 		int bulletCounter = 0;
 
-		public cpBody body;
+		//public cpBody body;
 
 		public override void Start()
 		{
@@ -177,7 +178,7 @@ namespace Aiv.Engine
 		int lastAsteroidSpawn = 2000;
 		int asteroidsCounter = 0;
 
-		public cpSpace space;
+		//public cpSpace space;
 
 		public List<string> explosionFrames = new List<string> ();
 
@@ -237,6 +238,8 @@ namespace Aiv.Engine
 			engine.LoadAsset("asteroid_1", new SpriteAsset("../../Assets/asteroid.png", 128, 0, 128, 128));
 			engine.LoadAsset("asteroid_2", new SpriteAsset("../../Assets/asteroid.png", 0, 128, 128, 128));
 			engine.LoadAsset("asteroid_3", new SpriteAsset("../../Assets/asteroid.png", 128, 128, 128, 128));
+
+            engine.LoadAsset("boom", new Asset("../../Assets/explosion.wav"));
 
 			for (int y = 0; y < 4; y++) {
 				for (int x = 0; x < 5; x++) {
