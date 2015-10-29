@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Linq;
+using System.Media;
 
 namespace Aiv.Engine
 {
@@ -268,6 +269,16 @@ namespace Aiv.Engine
 
 		public int Random(int start, int end) {
 			return this.random.Next (start, end);
+		}
+
+		public void PlaySound(string assetName) {
+			SoundPlayer soundPlayer = new SoundPlayer (this.GetAsset (assetName).fileName);
+			soundPlayer.Play ();
+		}
+
+		public void PlaySoundLoop(string assetName) {
+			SoundPlayer soundPlayer = new SoundPlayer (this.GetAsset (assetName).fileName);
+			soundPlayer.PlayLooping ();
 		}
 
 		/*

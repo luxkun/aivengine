@@ -53,5 +53,6 @@
     <None Include="Assets\blueship.png" />
     <None Include="Assets\asteroid.png" />
     <None Include="Assets\explosion.png" />
+    <None Include="Assets\explosion.wav" />
   </ItemGroup>
 </Project>

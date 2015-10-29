@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Collections.Generic;
 using ChipmunkSharp;
+using System.Media;
 
 namespace Aiv.Engine
 {
@@ -62,13 +63,16 @@ namespace Aiv.Engine
 			}
 
 			List<Collision> collisions = this.CheckCollisions ();
-			if (collisions.Count > 0) {
-				Explosion explosion = new Explosion ();
-				explosion.x = collisions [0].other.x;
-				explosion.y = collisions [0].other.y;
-				this.engine.SpawnObject ("explosion__", explosion);
-				collisions [0].other.Destroy ();
-				this.Destroy ();
+			foreach(Collision collision in collisions) {
+				if (collision.other.name.StartsWith ("asteroid")) {
+					Explosion explosion = new Explosion ();
+					explosion.x = collisions [0].other.x;
+					explosion.y = collisions [0].other.y;
+					this.engine.SpawnObject ("explosion__", explosion);
+					collisions [0].other.Destroy ();
+					this.Destroy ();
+					break;
+				}
 			}
 		}
 	}
@@ -84,11 +88,39 @@ namespace Aiv.Engine
 		{
 			this.AddHitBox ("chassis", 2, 0, 58, 46);
 		}
-		
+
 		public override void Update ()
 		{
 			//this.x = (int) this.body.GetPosition ().x;
 			//this.y = (int) this.body.GetPosition ().y;
+
+			if (this.engine.IsKeyDown(Keys.Right)) {
+				this.x += 10;
+			}
+
+			if (this.engine.IsKeyDown(Keys.Left)) {
+				this.x -= 10;
+			}
+
+			if (this.engine.IsKeyDown(Keys.Up)) {
+				this.y -= 10;
+			}
+
+			if (this.engine.IsKeyDown(Keys.Down)) {
+				this.y += 10;
+			}
+
+			if (this.y < 0)
+				this.y = 0;
+
+			if (this.x < 0)
+				this.x = 0;
+
+			if (this.x > this.engine.width - this.width)
+				this.x = this.engine.width - this.width;
+
+			if (this.y > this.engine.height - this.height)
+				this.y = this.engine.height - this.height;
 
 			if (lastShot > 0) {
 				lastShot -= this.deltaTicks;
@@ -107,14 +139,16 @@ namespace Aiv.Engine
 			}
 
 			List<Collision> collisions = this.CheckCollisions ();
-			if (collisions.Count > 0) {
-				TextObject to = (TextObject)this.engine.objects ["Text"];
-				to.text = string.Format("Game Over, collided with {0}", collisions[0].other.name);
-				Explosion explosion = new Explosion ();
-				explosion.x = collisions [0].other.x;
-				explosion.y = collisions [0].other.y;
-				this.engine.SpawnObject ("explosion__", explosion);
-				collisions [0].other.Destroy ();
+			foreach(Collision collision in collisions) {
+				if (collision.other.name.StartsWith ("asteroid")) {
+					TextObject to = (TextObject)this.engine.objects ["Text"];
+					to.text = string.Format ("Game Over, collided with {0}", collisions [0].other.name);
+					Explosion explosion = new Explosion ();
+					explosion.x = collisions [0].other.x;
+					explosion.y = collisions [0].other.y;
+					this.engine.SpawnObject ("explosion__", explosion);
+					collisions [0].other.Destroy ();
+				}
 			}
 		}
 	}
@@ -214,7 +248,7 @@ namespace Aiv.Engine
 
 			SpaceShip ship = new SpaceShip ();
 			ship.currentSprite = (SpriteAsset) engine.GetAsset ("ship");
-			ship.OnUpdate += new GameObject.UpdateEventHandler (Behaviours.Move);
+			//ship.OnUpdate += new GameObject.UpdateEventHandler (Behaviours.Move);
 			//ship.body = new cpBody (9, ChipmunkSharp.cp.MomentForBox(9, 50, 50) );
 			//ship.body.SetPosition (new cpVect (ship.x, ship.y));
 			//gamePlay.space.AddBody (ship.body);
