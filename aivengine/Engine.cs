@@ -77,7 +77,6 @@ namespace Aiv.Engine
 				this.SetStyle (ControlStyles.FixedHeight, true);
 
 				this.pbox = new PictureBox ();
-				pbox.Dock = DockStyle.Fill;
 				this.Controls.Add (pbox);
 
 				this.windowGraphics = pbox.CreateGraphics ();
@@ -101,7 +100,11 @@ namespace Aiv.Engine
 			this.window = new MainWindow ();
 			this.window.Text = windowName;
 			this.window.Size = new Size (width, height);
-
+			Size clientSize = this.window.ClientSize;
+			int deltaW = width - clientSize.Width;
+			int deltaH = height - clientSize.Height;
+			this.window.Size = new Size (width + deltaW, height + deltaH);
+			this.window.pbox.Size = new Size (width, height);
 
 
 			this.window.KeyDown += new KeyEventHandler (this.KeyDown);
@@ -146,9 +149,6 @@ namespace Aiv.Engine
 			int freq = 1000 / this.fps;
 			this.startTicks = this.ticks;
 
-			
-
-			//this.windowGraphics = Gtk.DotNet.Graphics.FromDrawable (this.gWindow.GdkWindow);
 
 			while (isGameRunning) {
 				
