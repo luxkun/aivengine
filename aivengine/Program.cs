@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using System.Drawing;
 using System.Collections.Generic;
+using ChipmunkSharp;
 
 namespace Aiv.Engine
 {
@@ -39,6 +40,12 @@ namespace Aiv.Engine
 			}
 		}
 
+		public static void StepPhysics(object sender) {
+			Engine engine = (Engine)sender;
+			GamePlay game = (GamePlay) engine.objects ["game"];
+			game.space.Step (1f / engine.fps);
+		}
+
 	}
 
 	public class Bullet : CircleObject {
@@ -61,6 +68,8 @@ namespace Aiv.Engine
 		int lastShot = 0;
 		int bulletCounter = 0;
 
+		public cpBody body;
+
 		public override void Start()
 		{
 			this.AddHitBox ("chassis", 2, 0, 58, 46);
@@ -68,6 +77,9 @@ namespace Aiv.Engine
 		
 		public override void Update ()
 		{
+			this.x = (int) this.body.GetPosition ().x;
+			this.y = (int) this.body.GetPosition ().y;
+
 			if (lastShot > 0) {
 				lastShot -= this.deltaTicks;
 			}
@@ -114,6 +126,11 @@ namespace Aiv.Engine
 	class GamePlay : GameObject {
 		int lastAsteroidSpawn = 2000;
 		int asteroidsCounter = 0;
+
+		public cpSpace space;
+
+		public int explosionFrames = 0;
+
 		public override void Update() {
 			// every 2 seconds spawns a new asteroid
 			if (lastAsteroidSpawn > 0) {
@@ -131,6 +148,8 @@ namespace Aiv.Engine
 		}
 	}
 
+
+
 	public class Program
 	{
         
@@ -138,10 +157,14 @@ namespace Aiv.Engine
 			Engine engine = new Engine ("Shooter", 1024, 768, 30);
 			engine.debugCollisions = true;
 
+			engine.OnBeforeUpdate += new Engine.BeforeUpdateEventHandler (Behaviours.StepPhysics);
 
 			// add the gameplay object, it governs the game logic
 			GamePlay gamePlay = new GamePlay();
 			engine.SpawnObject ("game", gamePlay);
+
+			gamePlay.space = new cpSpace ();
+			gamePlay.space.SetGravity (new cpVect(0, 9.8f));
 
 
 			TextObject to = new TextObject ("Arial", 17, "red");
@@ -156,9 +179,20 @@ namespace Aiv.Engine
 			engine.LoadAsset("asteroid_2", new SpriteAsset("../../Assets/asteroid.png", 0, 128, 128, 128));
 			engine.LoadAsset("asteroid_3", new SpriteAsset("../../Assets/asteroid.png", 128, 128, 128, 128));
 
+			for (int y = 0; y < 4; y++) {
+				for (int x = 0; x < 5; x++) {
+					engine.LoadAsset("explosion_" + gamePlay.explosionFrames, new SpriteAsset("../../Assets/explosion.png", x * 96, y * 96, 96, 96));
+					gamePlay.explosionFrames++;
+				}
+			}
+				
+
 			SpaceShip ship = new SpaceShip ();
 			ship.currentSprite = (SpriteAsset) engine.GetAsset ("ship");
 			ship.OnUpdate += new GameObject.UpdateEventHandler (Behaviours.Move);
+			ship.body = new cpBody (1, 9999);
+			ship.body.SetPosition (new cpVect (ship.x, ship.y));
+			gamePlay.space.AddBody (ship.body);
 
 			engine.SpawnObject ("Ship", ship);
 

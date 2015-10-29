@@ -32,6 +32,13 @@ namespace Aiv.Engine
 				return Environment.TickCount;
 			}
 		}
+
+		public delegate void BeforeUpdateEventHandler(object sender);
+		public event BeforeUpdateEventHandler OnBeforeUpdate;
+
+		public delegate void AfterUpdateEventHandler(object sender);
+		public event AfterUpdateEventHandler OnAfterUpdate;
+
 			
 		// when true the renderling list must be rebuilt
 		bool dirtyObjects;
@@ -159,6 +166,9 @@ namespace Aiv.Engine
 
 				Application.DoEvents ();
 
+				if (this.OnBeforeUpdate != null)
+					OnBeforeUpdate (this);
+
 				this.workingGraphics.Clear (Color.Black);
 
 				foreach (GameObject obj in this.objectsToRender) {
@@ -176,6 +186,9 @@ namespace Aiv.Engine
 						}
 					}
 				}
+
+				if (this.OnAfterUpdate != null)
+					OnAfterUpdate (this);
 
 				// commit graphics updates
 				//this.window.up ();
