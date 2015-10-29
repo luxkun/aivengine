@@ -49,7 +49,7 @@ namespace Aiv.Engine
 		private Bitmap workingBitmap;
 		public Graphics workingGraphics;
 
-		private bool isGameRunning = false;
+		public bool isGameRunning = false;
 
 		private Random random;
 
