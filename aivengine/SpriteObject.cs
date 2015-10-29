@@ -1,10 +1,24 @@
 ﻿using System;
 using System.Drawing;
+using System.Collections.Generic;
+
 
 namespace Aiv.Engine
 {
 	public class SpriteObject : GameObject
 	{
+
+		class Animation {
+			public int fps;
+			public List<SpriteAsset> sprites;
+			public int currentFrame;
+			public int lastTick;
+			public bool loop;
+		}
+
+		private Dictionary<string, Animation> animations;
+
+		public string currentAnimation;
 
 		private SpriteAsset _currentSprite;
 		public SpriteAsset currentSprite {
@@ -25,11 +39,59 @@ namespace Aiv.Engine
 		public int width = 0;
 		public int height = 0;
 
+		private void Animate(string animationName) {
+			Animation animation = this.animations [animationName];
+			int neededTicks = 1000 / animation.fps;
+			int ticks = this.ticks;
+
+			if (ticks - animation.lastTick >= neededTicks) {
+				animation.lastTick = ticks;
+				animation.currentFrame++;
+				// end of the animation ?
+				int lastFrame = animation.sprites.Count-1;
+				if (animation.currentFrame >= lastFrame) {
+					if (animation.loop) {
+						animation.currentFrame = 0;
+					} else {
+						// block to the last frame
+						animation.currentFrame = lastFrame;
+					}
+				}
+			}
+			// simply draw the current frame
+			Bitmap spriteToDraw = animation.sprites [animation.currentFrame].sprite;
+			this.width = spriteToDraw.Width;
+			this.height = spriteToDraw.Height;
+			this.engine.workingGraphics.DrawImageUnscaled (spriteToDraw, this.x, this.y);
+		}
+
 		public override void Draw() {
 			base.Draw();
+			if (this.currentAnimation != null) {
+				Animate (this.currentAnimation);
+				return;
+			}
 			if (this.currentSprite != null) {
 				this.engine.workingGraphics.DrawImageUnscaled (this.currentSprite.sprite, this.x, this.y);
 			}
+		}
+
+		public void AddAnimation(string name, IEnumerable<string> assets, int fps, bool loop=false) {
+			// allocate animations dictionary on demand
+			if (this.animations == null) {
+				this.animations = new Dictionary<string, Animation> ();
+			}
+			Animation animation = new Animation ();
+			animation.fps = fps;
+			animation.sprites = new List<SpriteAsset>();
+			foreach (string asset in assets) {
+				animation.sprites.Add ((SpriteAsset) this.engine.GetAsset (asset));
+			}
+			animation.currentFrame = 0;
+			// force the first frame to be drawn
+			animation.lastTick = 0;
+			animation.loop = loop;
+			this.animations [name] = animation;
 		}
 	}
 }

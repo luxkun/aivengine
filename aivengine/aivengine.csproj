@@ -52,5 +52,6 @@
   <ItemGroup>
     <None Include="Assets\blueship.png" />
     <None Include="packages.config" />
+    <None Include="Assets\asteroid.png" />
   </ItemGroup>
 </Project>

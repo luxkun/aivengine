@@ -41,6 +41,8 @@ namespace Aiv.Engine
 
 		private bool isGameRunning = false;
 
+		private Random random;
+
         class MainWindow : Form
         {
 
@@ -122,7 +124,7 @@ namespace Aiv.Engine
 			this.assets = new Dictionary<string, Asset> ();
 			this.keyboardTable = new Dictionary<Keys, bool> ();
 
-
+			this.random = new Random ();
          
 		}
 			
@@ -232,6 +234,17 @@ namespace Aiv.Engine
 		public void RemoveObject(GameObject obj) {
 			this.objects.Remove (obj.name);
 			this.dirtyObjects = true;
+		}
+
+		/*
+		 * 
+		 * 
+		 * Utility functions
+		 *
+		 */
+
+		public int Random(int start, int end) {
+			return this.random.Next (start, end);
 		}
 
 		/*

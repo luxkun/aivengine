@@ -12,6 +12,12 @@ namespace Aiv.Engine
 		{
 			this.sprite = new Bitmap (this.fileName);
 		}
+
+		public SpriteAsset(string fileName, int x, int y, int width, int height) : this(fileName)
+		{
+			Rectangle rect = new Rectangle(x, y, width, height);
+			this.sprite = this.sprite.Clone (rect, this.sprite.PixelFormat);
+		}
 	}
 }
 
