@@ -22,6 +22,8 @@ namespace Aiv.Engine
 		// in milliseconds
 		public int duration;
 
+		// TODO choose what to do with spawn frequency
+
 		public class Particle
 		{
 			public int x;
