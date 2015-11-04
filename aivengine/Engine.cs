@@ -55,6 +55,8 @@ namespace Aiv.Engine
 
 		public bool debugCollisions;
 
+		public Mouse mouse;
+
 		class MainWindow : Form
 		{
 
@@ -125,6 +127,8 @@ namespace Aiv.Engine
 			this.keyboardTable = new Dictionary<Keys, bool> ();
 
 			this.random = new Random ();
+			this.mouse = new Mouse (this);
+
          
 		}
 
@@ -285,6 +289,73 @@ namespace Aiv.Engine
 				return false;
 			}
 			return this.keyboardTable [key];
+		}
+
+		/*
+		 * 
+		 * 
+		 * Mouse management
+		 * 
+		 */
+
+		public class Mouse {
+
+			public Engine engine;
+			public bool left;
+			public bool right;
+			public bool middle;
+			public int wheel;
+
+			public Mouse(Engine engine) {
+				this.engine = engine;
+				this.engine.window.pbox.MouseDown += new MouseEventHandler(this.MouseDown);
+				this.engine.window.pbox.MouseUp += new MouseEventHandler(this.MouseUp);
+				this.engine.window.MouseWheel += new MouseEventHandler(this.MouseWheel);
+			}
+
+			public int x {
+				get {
+					return Cursor.Position.X - this.engine.window.Location.X;
+				}
+			}
+			public int y {
+				get {
+					return Cursor.Position.Y - this.engine.window.Location.Y;
+				}
+			}
+			public int screenX {
+				get {
+					return Cursor.Position.X;
+				}
+			}
+			public int screenY {
+				get {
+					return Cursor.Position.Y;
+				}
+			}
+
+			private void MouseDown(object sender, MouseEventArgs e) {
+				if (e.Button == MouseButtons.Left)
+					this.left = true;
+				if (e.Button == MouseButtons.Right)
+					this.right = true;
+				if (e.Button == MouseButtons.Middle)
+					this.middle = true;
+			}
+
+			private void MouseUp(object sender, MouseEventArgs e) {
+				if (e.Button == MouseButtons.Left)
+					this.left = false;
+				if (e.Button == MouseButtons.Right)
+					this.right = false;
+				if (e.Button == MouseButtons.Middle)
+					this.middle = false;
+			}
+
+			private void MouseWheel(object sender, MouseEventArgs e) {
+				wheel = e.Delta;
+			}
+
 		}
 	}
 }
