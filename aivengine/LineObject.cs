@@ -12,7 +12,8 @@ namespace Aiv.Engine
 
 		private Pen pen;
 
-		public override void Draw() {
+		public override void Draw ()
+		{
 			base.Draw ();
 			if (pen == null)
 				pen = new Pen (color);
@@ -29,24 +30,29 @@ namespace Aiv.Engine
 
 		protected Pen pen;
 
-		public override void Draw() {
+		public override void Draw ()
+		{
 			base.Draw ();
 			if (pen == null)
 				pen = new Pen (color);
 		}
 	}
 
-	public class HorizontalRayObject : RayObject {
+	public class HorizontalRayObject : RayObject
+	{
 		
-		public override void Draw() {
+		public override void Draw ()
+		{
 			base.Draw ();
 			this.engine.workingGraphics.DrawLine (this.pen, this.x, this.y, this.x + length, this.y);
 		}
 	}
 
-	public class VerticalRayObject : RayObject {
+	public class VerticalRayObject : RayObject
+	{
 
-		public override void Draw() {
+		public override void Draw ()
+		{
 			base.Draw ();
 			this.engine.workingGraphics.DrawLine (this.pen, this.x, this.y, this.x, this.y + length);
 		}
