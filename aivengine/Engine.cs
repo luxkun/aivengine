@@ -56,6 +56,7 @@ namespace Aiv.Engine
 		public bool debugCollisions;
 
 		public Mouse mouse;
+		public Joystick[] joysticks;
 
 		class MainWindow : Form
 		{
@@ -126,8 +127,9 @@ namespace Aiv.Engine
 			this.assets = new Dictionary<string, Asset> ();
 			this.keyboardTable = new Dictionary<Keys, bool> ();
 
-			this.random = new Random ();
+			this.random = new Random (Guid.NewGuid ().GetHashCode ());
 			this.mouse = new Mouse (this);
+			this.joysticks = new Joystick[8];
 
          
 		}
@@ -298,7 +300,8 @@ namespace Aiv.Engine
 		 * 
 		 */
 
-		public class Mouse {
+		public class Mouse
+		{
 
 			public Engine engine;
 			public bool left;
@@ -306,11 +309,12 @@ namespace Aiv.Engine
 			public bool middle;
 			public int wheel;
 
-			public Mouse(Engine engine) {
+			public Mouse (Engine engine)
+			{
 				this.engine = engine;
-				this.engine.window.pbox.MouseDown += new MouseEventHandler(this.MouseDown);
-				this.engine.window.pbox.MouseUp += new MouseEventHandler(this.MouseUp);
-				this.engine.window.MouseWheel += new MouseEventHandler(this.MouseWheel);
+				this.engine.window.pbox.MouseDown += new MouseEventHandler (this.MouseDown);
+				this.engine.window.pbox.MouseUp += new MouseEventHandler (this.MouseUp);
+				this.engine.window.MouseWheel += new MouseEventHandler (this.MouseWheel);
 			}
 
 			public int x {
@@ -318,23 +322,27 @@ namespace Aiv.Engine
 					return Cursor.Position.X - this.engine.window.Location.X;
 				}
 			}
+
 			public int y {
 				get {
 					return Cursor.Position.Y - this.engine.window.Location.Y;
 				}
 			}
+
 			public int screenX {
 				get {
 					return Cursor.Position.X;
 				}
 			}
+
 			public int screenY {
 				get {
 					return Cursor.Position.Y;
 				}
 			}
 
-			private void MouseDown(object sender, MouseEventArgs e) {
+			private void MouseDown (object sender, MouseEventArgs e)
+			{
 				if (e.Button == MouseButtons.Left)
 					this.left = true;
 				if (e.Button == MouseButtons.Right)
@@ -343,7 +351,8 @@ namespace Aiv.Engine
 					this.middle = true;
 			}
 
-			private void MouseUp(object sender, MouseEventArgs e) {
+			private void MouseUp (object sender, MouseEventArgs e)
+			{
 				if (e.Button == MouseButtons.Left)
 					this.left = false;
 				if (e.Button == MouseButtons.Right)
@@ -352,10 +361,43 @@ namespace Aiv.Engine
 					this.middle = false;
 			}
 
-			private void MouseWheel(object sender, MouseEventArgs e) {
+			private void MouseWheel (object sender, MouseEventArgs e)
+			{
 				wheel = e.Delta;
 			}
 
+		}
+
+
+		/*
+		 * 
+		 * 
+		 *  Joystick management (platform specific, expects initialization from Aiv.Engine.Input)
+		 * 
+		 */
+
+		public class Joystick
+		{
+			public string name;
+			public int x;
+			public int y;
+			public bool[] buttons;
+			public long id;
+			public int index;
+
+			public Joystick ()
+			{
+				// max 20 buttons
+				this.buttons = new bool[20];
+			}
+
+			public bool anyButton() {
+				foreach (bool pressed in this.buttons) {
+					if (pressed)
+						return true;
+				}
+				return false;
+			}
 		}
 	}
 }
