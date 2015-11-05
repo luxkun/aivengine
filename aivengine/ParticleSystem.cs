@@ -1,4 +1,11 @@
-﻿using System;
+/*
+
+Copyright 2015 20tab S.r.l.
+Copyright 2015 Aiv S.r.l.
+
+*/
+
+using System;
 using System.Drawing;
 using Aiv.Engine;
 
