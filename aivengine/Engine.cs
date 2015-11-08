@@ -53,7 +53,7 @@ namespace Aiv.Engine
 		// when true the renderling list must be rebuilt
 		bool dirtyObjects;
 
-		private Bitmap workingBitmap;
+		protected Bitmap workingBitmap;
 		public Graphics workingGraphics;
 
 		public bool isGameRunning = false;
@@ -65,7 +65,7 @@ namespace Aiv.Engine
 		public Mouse mouse;
 		public Joystick[] joysticks;
 
-		class MainWindow : Form
+		private class MainWindow : Form
 		{
 
 			public Graphics windowGraphics;
@@ -99,31 +99,20 @@ namespace Aiv.Engine
 			}
 		}
 
-		MainWindow window;
+		private MainWindow window;
 
-		public Engine (string windowName, int width, int height, int fps)
+		protected void Initialize (string windowName, int width, int height, int fps)
 		{
+			
+
 			this.width = width;
 			this.height = height;
-
-
-			this.window = new MainWindow ();
-			this.window.Text = windowName;
-			this.window.Size = new Size (width, height);
-			Size clientSize = this.window.ClientSize;
-			int deltaW = width - clientSize.Width;
-			int deltaH = height - clientSize.Height;
-			this.window.Size = new Size (width + deltaW, height + deltaH);
-			this.window.pbox.Size = new Size (width, height);
-
-
-			this.window.KeyDown += new KeyEventHandler (this.KeyDown);
-			this.window.KeyUp += new KeyEventHandler (this.KeyUp);
-
 			this.fps = fps;
 
-			this.workingBitmap = new Bitmap (width, height);
+
+			this.workingBitmap = new Bitmap (width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 			this.workingGraphics = Graphics.FromImage (this.workingBitmap);
+			this.workingGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 			this.workingGraphics.CompositingQuality = CompositingQuality.HighSpeed;
 			this.workingGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
 			this.workingGraphics.PixelOffsetMode = PixelOffsetMode.HighSpeed;
@@ -135,10 +124,33 @@ namespace Aiv.Engine
 			this.keyboardTable = new Dictionary<Keys, bool> ();
 
 			this.random = new Random (Guid.NewGuid ().GetHashCode ());
-			this.mouse = new Mouse (this);
+
 			this.joysticks = new Joystick[8];
 
-         
+		}
+
+		protected Engine ()
+		{
+		}
+
+		public Engine (string windowName, int width, int height, int fps)
+		{
+			
+
+			this.Initialize (windowName, width, height, fps);
+
+			this.window = new MainWindow ();
+			this.window.Text = windowName;
+			this.window.Size = new Size (width, height);
+			Size clientSize = this.window.ClientSize;
+			int deltaW = width - clientSize.Width;
+			int deltaH = height - clientSize.Height;
+			this.window.Size = new Size (width + deltaW, height + deltaH);
+			this.window.pbox.Size = new Size (width, height);
+			this.window.KeyDown += new KeyEventHandler (this.KeyDown);
+			this.window.KeyUp += new KeyEventHandler (this.KeyUp);
+			this.mouse = new Mouse (this);
+
 		}
 
 
@@ -151,7 +163,46 @@ namespace Aiv.Engine
 			this.objects.Clear ();
 		}
 
-		public void Run ()
+		protected void GameUpdate (int startTick)
+		{
+			
+
+			if (this.OnBeforeUpdate != null)
+				OnBeforeUpdate (this);
+
+			this.workingGraphics.Clear (Color.Black);
+
+			foreach (GameObject obj in this.objectsToRender) {
+				obj.deltaTicks = startTick - obj.ticks;
+				obj.ticks = startTick;
+				if (!obj.enabled)
+					continue;
+				obj.Draw ();
+				if (this.debugCollisions) {
+					Pen green = new Pen (Color.Green);
+					if (obj.hitBoxes != null) {
+						foreach (GameObject.HitBox hitBox in obj.hitBoxes.Values) {
+							this.workingGraphics.DrawRectangle (green, obj.x + hitBox.x, obj.y + hitBox.y, hitBox.width, hitBox.height);
+						}
+					}
+				}
+			}
+
+			if (this.OnAfterUpdate != null)
+				OnAfterUpdate (this);
+
+
+
+			if (this.dirtyObjects) {
+				this.objectsToRender.Clear ();
+				foreach (GameObject obj in this.objects.Values.OrderBy(o=>o.order)) {
+					this.objectsToRender.Add (obj);
+				}
+				this.dirtyObjects = false;
+			}
+		}
+
+		public virtual void Run ()
 		{
 
 			this.window.Show ();
@@ -169,39 +220,9 @@ namespace Aiv.Engine
 
 				Application.DoEvents ();
 
-				if (this.OnBeforeUpdate != null)
-					OnBeforeUpdate (this);
-
-				this.workingGraphics.Clear (Color.Black);
-
-				foreach (GameObject obj in this.objectsToRender) {
-					obj.deltaTicks = startTick - obj.ticks;
-					obj.ticks = startTick;
-					if (!obj.enabled)
-						continue;
-					obj.Draw ();
-					if (this.debugCollisions) {
-						Pen green = new Pen (Color.Green);
-						if (obj.hitBoxes != null) {
-							foreach (GameObject.HitBox hitBox in obj.hitBoxes.Values) {
-								this.workingGraphics.DrawRectangle (green, obj.x + hitBox.x, obj.y + hitBox.y, hitBox.width, hitBox.height);
-							}
-						}
-					}
-				}
-
-				if (this.OnAfterUpdate != null)
-					OnAfterUpdate (this);
+				this.GameUpdate (startTick);
 
 				this.window.pbox.Image = this.workingBitmap;
-
-				if (this.dirtyObjects) {
-					this.objectsToRender.Clear ();
-					foreach (GameObject obj in this.objects.Values.OrderBy(o=>o.order)) {
-						this.objectsToRender.Add (obj);
-					}
-					this.dirtyObjects = false;
-				}
 
 				int endTick = this.ticks;
 
@@ -264,13 +285,13 @@ namespace Aiv.Engine
 			return this.random.Next (start, end);
 		}
 
-		public void PlaySound (string assetName)
+		public virtual void PlaySound (string assetName)
 		{
 			SoundPlayer soundPlayer = new SoundPlayer (this.GetAsset (assetName).fileName);
 			soundPlayer.Play ();
 		}
 
-		public void PlaySoundLoop (string assetName)
+		public virtual void PlaySoundLoop (string assetName)
 		{
 			SoundPlayer soundPlayer = new SoundPlayer (this.GetAsset (assetName).fileName);
 			soundPlayer.PlayLooping ();
@@ -292,12 +313,14 @@ namespace Aiv.Engine
 			this.keyboardTable [e.KeyCode] = false;
 		}
 
-		public bool IsKeyDown (Keys key)
+		public virtual bool IsKeyDown (int key)
 		{
-			if (!keyboardTable.ContainsKey (key)) {
+			Keys _key = (Keys) key;
+			
+			if (!keyboardTable.ContainsKey (_key)) {
 				return false;
 			}
-			return this.keyboardTable [key];
+			return this.keyboardTable [_key];
 		}
 
 		/*
@@ -398,7 +421,8 @@ namespace Aiv.Engine
 				this.buttons = new bool[20];
 			}
 
-			public bool anyButton() {
+			public bool anyButton ()
+			{
 				foreach (bool pressed in this.buttons) {
 					if (pressed)
 						return true;
