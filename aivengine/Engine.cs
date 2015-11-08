@@ -323,6 +323,11 @@ namespace Aiv.Engine
 			return this.keyboardTable [_key];
 		}
 
+		public bool IsKeyDown (Keys key)
+		{
+			return this.IsKeyDown ((int)key);
+		}
+
 		/*
 		 * 
 		 * 
