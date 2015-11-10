@@ -4,6 +4,8 @@ AIV Simple Game Engine for first year students
 
 This is the core of the AIV (Accademia Italiana Videogiochi) Game Engine, targeted at first year students. It is a 2D engine written in C# with support for animated sprites, simple geometric forms (rectangles, circles, lines ...) text and tilemaps.
 
+Simple AABB collisions are implemented, sweeping support is on work.
+
 Basic sound is supported via System.Media.SoundPlayer.
 
 This specific version runs over Windows.Forms (both Microsoft and Mono implementations) so you get no hardware acceleration. If you want an hardware accelerated version (via OpenGL/OpenGL-ES) check the aivegine-opentk repository: https://github.com/aiv01/aivengine-opentk
