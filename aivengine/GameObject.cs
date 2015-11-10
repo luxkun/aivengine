@@ -106,6 +106,14 @@ namespace Aiv.Engine
 		{
 		}
 
+		// every subclass should override this
+		public virtual GameObject Clone() {
+			GameObject go = new GameObject ();
+			go.name = this.name;
+			go.x = this.x;
+			go.y = this.y;
+			return go;
+		}
 
 		public void AddHitBox(string name, int x, int y, int width, int height) {
 			if (this.hitBoxes == null) {

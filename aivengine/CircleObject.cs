@@ -17,15 +17,27 @@ namespace Aiv.Engine
 		public bool fill;
 		private Pen pen;
 
-		public override void Draw() {
+		public override void Draw ()
+		{
 			base.Draw ();
 			if (pen == null)
 				pen = new Pen (color);
 			this.engine.workingGraphics.DrawEllipse (pen, this.x, this.y, radius * 2, radius * 2);
 			if (this.fill)
-				this.engine.workingGraphics.FillEllipse(pen.Brush, this.x, this.y, radius * 2, radius * 2);
+				this.engine.workingGraphics.FillEllipse (pen.Brush, this.x, this.y, radius * 2, radius * 2);
 				
 		}
+
+
+		public override GameObject Clone ()
+		{
+			CircleObject go = (CircleObject)base.Clone ();
+			go.radius = this.radius;
+			go.color = this.color;
+			go.fill = this.fill;
+			return go;
+		}
 	}
+
 }
 

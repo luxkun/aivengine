@@ -26,6 +26,15 @@ namespace Aiv.Engine
 				pen = new Pen (color);
 			this.engine.workingGraphics.DrawLine (pen, this.x, this.y, this.x2, this.y2);
 		}
+
+		public override GameObject Clone ()
+		{
+			LineObject go = (LineObject)base.Clone ();
+			go.x2 = this.x2;
+			go.y2 = this.y2;
+			go.color = this.color;
+			return go;
+		}
 	}
 
 	public class RayObject : GameObject
@@ -42,6 +51,14 @@ namespace Aiv.Engine
 			base.Draw ();
 			if (pen == null)
 				pen = new Pen (color);
+		}
+
+		public override GameObject Clone ()
+		{
+			RayObject go = (RayObject)base.Clone ();
+			go.length = this.length;
+			go.color = this.color;
+			return go;
 		}
 	}
 
