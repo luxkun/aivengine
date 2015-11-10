@@ -11,3 +11,5 @@ This specific version runs over Windows.Forms (both Microsoft and Mono implement
 Most of the design choices are driven by the goal of introducing Unity3D in the second year.
 
 The engine is released as GPL2, but you can get commercial licensing or support (as well as training courses) by simply contacting info at aiv01.it or info at 20tab.com
+
+The engine runs on Windows, MacOSX and Linux
