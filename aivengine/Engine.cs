@@ -426,6 +426,11 @@ namespace Aiv.Engine
 				this.buttons = new bool[20];
 			}
 
+			public bool GetButton (int buttonIndex)
+			{
+				return buttons [buttonIndex];
+			}
+
 			public bool anyButton ()
 			{
 				foreach (bool pressed in this.buttons) {
@@ -433,6 +438,11 @@ namespace Aiv.Engine
 						return true;
 				}
 				return false;
+			}
+
+			public bool AnyButton ()
+			{
+				return anyButton ();
 			}
 		}
 	}
