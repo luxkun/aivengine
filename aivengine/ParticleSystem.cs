@@ -39,6 +39,9 @@ namespace Aiv.Engine
 		// can be 'random', 'fixed', 'homogeneous'
 		public string direction;
 
+		// ms after the bullets should start to fade
+		public int fade = -1;
+
 		// a spawn function for every type of particle
 		private static Dictionary<string, Action<ParticleSystem>> spawnParticlesMap = new Dictionary<string, Action<ParticleSystem>> {
 			{ "homogeneous", (ParticleSystem p) => 
@@ -47,7 +50,7 @@ namespace Aiv.Engine
 					for (int i = 0; i < p.maxParticles; i++) {
 						Particle particle = new Particle() { 
 							bx = (float)Math.Cos(i * step) * p.padding, by = (float)Math.Sin(i * step) * p.padding, order = p.order+1, life = p.duration, 
-							name = $"{p.name}_particle_{i}" , owner = p, radius = p.size, color = p.color, fill = true, angle = i * step, 
+							name = $"{p.name}_particle_{i}" , owner = p, radius = p.size, color = p.color, fill = true, angle = i * step, fade = p.fade, 
 							GetNextStep = (int ticks, int angle) => {
 								return Tuple.Create((float)Math.Cos(angle) * p.speed * (ticks/1000f), (float)Math.Sin(angle) * p.speed * (ticks/1000f));
 							}
@@ -63,6 +66,14 @@ namespace Aiv.Engine
 			public float bx;
 			public float by;
 
+			public int fade = -1;
+			private enum FadeStatus {
+				DISABLED, ENABLED, FADING
+			};
+			private FadeStatus fadeStatus;
+			private float virtualRadius;
+			private float fadeStep;
+
 			// life counter, when it reaches 0, the particle is destroyed
 			public int life;
 			private bool started;
@@ -73,16 +84,31 @@ namespace Aiv.Engine
 
 			public Func<int, int, Tuple<float, float>> GetNextStep;
 
+
 			public override void Update ()
 			{
 				base.Update ();
 				if (!started) {
 					started = true;
+					fadeStatus = fade != -1 ? FadeStatus.ENABLED : FadeStatus.DISABLED;
 					deltaTicks = 0;
 				}
 				life -= deltaTicks;
 				if (life <= 0)
 					this.Destroy ();
+				
+				if (fadeStatus == FadeStatus.ENABLED && fade > 0)
+					fade -= deltaTicks;
+				if (fadeStatus == FadeStatus.ENABLED && fade <= 0) {
+					fadeStatus = FadeStatus.FADING;
+					virtualRadius = 0;
+					fadeStep = (float)radius / life;
+				}
+				if (fadeStatus == FadeStatus.FADING) {
+					virtualRadius += fadeStep * deltaTicks;
+					radius -= (int)virtualRadius;
+					virtualRadius -= (int)virtualRadius;
+				}
 
 				var nextStep = GetNextStep (deltaTicks, angle);
 				bx += nextStep.Item1;
