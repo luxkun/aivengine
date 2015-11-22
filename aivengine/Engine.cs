@@ -431,6 +431,12 @@ namespace Aiv.Engine
 				return buttons [buttonIndex];
 			}
 
+			{
+				if (axisIndex < 0 || axisIndex > 1)
+					throw new ArgumentOutOfRangeException ($"Wrong axis index '{axisIndex}', only 0 and 1 are supported.");
+				return axisIndex == 0 ? x : y;
+			}
+
 			public bool anyButton ()
 			{
 				foreach (bool pressed in this.buttons) {
