@@ -431,6 +431,7 @@ namespace Aiv.Engine
 				return buttons [buttonIndex];
 			}
 
+			public int GetAxis (int axisIndex)
 			{
 				if (axisIndex < 0 || axisIndex > 1)
 					throw new ArgumentOutOfRangeException ($"Wrong axis index '{axisIndex}', only 0 and 1 are supported.");
