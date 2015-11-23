@@ -41,7 +41,7 @@ namespace Aiv.Engine
 		public string direction;
 
 		// used for fixed
-		public int angle;
+		public int angle; // in degrees
 
 		// ms after the bullets should start to fade
 		public int fade = -1;
@@ -51,11 +51,13 @@ namespace Aiv.Engine
 			// example: new ParticleSystem ("test", "homogeneous", 80, 800, Color.White, 2, 20, 2) { order = this.order, x = this.x, y = this.y, fade = 200 };
 			{ "homogeneous", (ParticleSystem p) => 
 				{ 
-					int step = (int)(360f / p.maxParticles);
+					float step = 360f / p.maxParticles;
 					for (int i = 0; i < p.maxParticles; i++) {
+						float angleF = Utils.ConvertDegreeToRadians((int)(i * step));
 						Particle particle = new Particle(p) { 
-							name = $"{p.name}_particle_{i}", bx = (float)Math.Cos(i * step) * p.padding, by = (float)Math.Sin(i * step) * p.padding, angle = i * step,
-							GetNextStep = (int ticks, int angle) => {
+							name = $"{p.name}_particle_{i}", bx = (float)Math.Cos(angleF) * p.padding, by = (float)Math.Sin(angleF) * p.padding, 
+							angle = angleF,
+							GetNextStep = (int ticks, float angle) => {
 								return Tuple.Create((float)Math.Cos(angle) * p.speed * (ticks/1000f), (float)Math.Sin(angle) * p.speed * (ticks/1000f));
 							}
 						};
@@ -69,8 +71,9 @@ namespace Aiv.Engine
 					int containerWidth = p.size*2 + p.padding*2;
 					int pCount = 0;
 					int index = 0;
-					double calcX = Math.Sin(p.angle);
-					double calcY = Math.Cos(p.angle);
+					float angleF = Utils.ConvertDegreeToRadians(p.angle);
+					double calcX = Math.Sin(angleF);
+					double calcY = Math.Cos(angleF);
 					Tuple<int, int> lastPoint = null;
 					while (pCount < p.maxParticles) {
 						Tuple<int, int> newPoint = Tuple.Create((int)(calcX * index), (int)(calcY * index));
@@ -78,9 +81,9 @@ namespace Aiv.Engine
 						if (lastPoint == null || (Math.Abs(newPoint.Item1 - lastPoint.Item1) + Math.Abs(newPoint.Item2 - lastPoint.Item2)) > containerWidth) {
 							lastPoint = newPoint;
 							Particle particle = new Particle(p) { 
-								name = $"{p.name}_particle_{index}", bx = newPoint.Item1, by = newPoint.Item2, angle = p.angle, 
-								GetNextStep = (int ticks, int angle) => {
-									return Tuple.Create((float)Math.Cos(angle) * p.speed * (ticks/1000f), (float)Math.Sin(angle) * p.speed * (ticks/1000f));
+								name = $"{p.name}_particle_{index}", bx = newPoint.Item1, by = newPoint.Item2, angle = angleF, 
+								GetNextStep = (int ticks, float angle) => {
+									return Tuple.Create((float)Math.Cos(angle) * p.speed * (ticks/1000f), -1 * (float)Math.Sin(angle) * p.speed * (ticks/1000f));
 								}
 							};
 							p.engine.SpawnObject(particle.name, particle);
@@ -114,11 +117,11 @@ namespace Aiv.Engine
 			public int life;
 			private bool started;
 
-			public int angle;
+			public float angle; // ready for Math.Sin/Cos
 
 			public ParticleSystem owner;
 
-			public Func<int, int, Tuple<float, float>> GetNextStep;
+			public Func<int, float, Tuple<float, float>> GetNextStep;
 
 			public Particle (ParticleSystem owner) : base()
 			{

@@ -44,6 +44,7 @@
     <Compile Include="RectangleObject.cs" />
     <Compile Include="LineObject.cs" />
     <Compile Include="ParticleSystem.cs" />
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup />
