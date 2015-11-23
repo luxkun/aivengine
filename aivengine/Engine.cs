@@ -266,6 +266,10 @@ namespace Aiv.Engine
 			// force the rendering list to be rebuilt
 			this.dirtyObjects = true;
 		}
+		public void SpawnObject (GameObject obj)
+		{
+			SpawnObject (obj.name, obj);
+		}
 
 		public void RemoveObject (GameObject obj)
 		{
