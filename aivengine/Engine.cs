@@ -295,6 +295,12 @@ namespace Aiv.Engine
 			soundPlayer.Play ();
 		}
 
+	    public virtual void FullScreen()
+	    {
+            window.WindowState = FormWindowState.Maximized;
+	        window.FormBorderStyle = FormBorderStyle.None;
+	    }
+
 		public virtual void PlaySoundLoop (string assetName)
 		{
 			SoundPlayer soundPlayer = new SoundPlayer (this.GetAsset (assetName).fileName);
