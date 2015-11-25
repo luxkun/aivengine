@@ -133,7 +133,10 @@ namespace Aiv.Engine
 
 		public override GameObject Clone ()
 		{
-			SpriteObject go = (SpriteObject)base.Clone ();
+			SpriteObject go = new SpriteObject();
+		    go.name = name;
+		    go.x = x;
+		    go.y = y;
 			go.currentSprite = this.currentSprite;
 			if (this.animations != null) {
 				go.animations = new Dictionary<string, Animation> ();

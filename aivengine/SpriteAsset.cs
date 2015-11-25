@@ -7,18 +7,18 @@ Copyright 2015 Aiv S.r.l.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 
 namespace Aiv.Engine
 {
 	public class SpriteAsset : Asset
 	{
-        private static Dictionary<Asset, Bitmap> cacheDictionary = new Dictionary<Asset, Bitmap>();
-
         public Bitmap sprite;
 
 		public SpriteAsset (string fileName) : base(fileName)
 		{
+            Debug.WriteLine("Loading bitmap: " + fileName);
 			this.sprite = new Bitmap (this.fileName);
 		}
 
@@ -27,15 +27,6 @@ namespace Aiv.Engine
 			Rectangle rect = new Rectangle(x, y, width, height);
 			this.sprite = this.sprite.Clone (rect, this.sprite.PixelFormat);
 		}
-
-	    internal static Bitmap GetBitmap(Asset asset)
-	    {
-	        if (!cacheDictionary.ContainsKey(asset))
-	        {
-	            cacheDictionary[asset] = new Bitmap(asset.fileName);
-            }
-            return cacheDictionary[asset];
-        }
 	}
 }
 
