@@ -24,10 +24,10 @@ namespace Aiv.Engine
 	        get { return _order; }
 	        set
 	        {
-	            _order = value;
-                if (engine != null) // if the object has been spawned
+                if (engine != null && _order != value) // if the object has been spawned
 	                engine.UpdatedObjectOrder(this);
-	        }
+                _order = value;
+            }
 	    }
 
 		public Engine engine;

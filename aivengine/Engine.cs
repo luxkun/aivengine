@@ -319,6 +319,7 @@ namespace Aiv.Engine
 
 	    public virtual void FullScreen()
 	    {
+            // should also change primary display's resolution
             window.WindowState = FormWindowState.Maximized;
 	        window.FormBorderStyle = FormBorderStyle.None;
 	    }
