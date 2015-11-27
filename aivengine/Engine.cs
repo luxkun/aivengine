@@ -31,9 +31,11 @@ namespace Aiv.Engine
 		// this is constantly filled with keyboard status
 		private Dictionary<Keys, bool> keyboardTable;
 
-		private List<GameObject> objectsToRender;
+		public SortedSet<GameObject> sortedObjects;
 
-		public int startTicks;
+	    public int totalObjCount;
+
+        public int startTicks;
 
 		public int ticks {
 			get {
@@ -49,11 +51,11 @@ namespace Aiv.Engine
 
 		public event AfterUpdateEventHandler OnAfterUpdate;
 
-			
-		// when true the renderling list must be rebuilt
-		bool dirtyObjects;
+        // objects that need to be added (1) or removed (0) from sortedObjects
+        // objects that have changed order (2)
+        private Dictionary<GameObject, int> dirtyObjects;
 
-		protected Bitmap workingBitmap;
+        protected Bitmap workingBitmap;
 		public Graphics workingGraphics;
 
 		public bool isGameRunning = false;
@@ -82,8 +84,10 @@ namespace Aiv.Engine
                 
 				this.SetStyle (ControlStyles.AllPaintingInWmPaint, true);
 				this.SetStyle (ControlStyles.OptimizedDoubleBuffer, true);
-				this.SetStyle (ControlStyles.UserPaint, false);
-				this.SetStyle (ControlStyles.FixedWidth, true);
+                // needed to be true since AllPaintingInWmPaint and OptimizedDoubleBuffer are true
+                this.SetStyle (ControlStyles.UserPaint, true);
+                this.SetStyle (ControlStyles.CacheText, true);
+                this.SetStyle (ControlStyles.FixedWidth, true);
 				this.SetStyle (ControlStyles.FixedHeight, true);
 
 				this.pbox = new PictureBox ();
@@ -119,11 +123,13 @@ namespace Aiv.Engine
 
 			// create dictionaries
 			this.objects = new Dictionary<string, GameObject> ();
-			this.objectsToRender = new List<GameObject> ();
+			this.sortedObjects = new SortedSet<GameObject>(new GameObjectComparer());
 			this.assets = new Dictionary<string, Asset> ();
 			this.keyboardTable = new Dictionary<Keys, bool> ();
 
-			this.random = new Random (Guid.NewGuid ().GetHashCode ());
+            this.dirtyObjects = new Dictionary<GameObject, int>();
+
+            this.random = new Random (Guid.NewGuid ().GetHashCode ());
 
 			this.joysticks = new Joystick[8];
 
@@ -161,6 +167,7 @@ namespace Aiv.Engine
 			}
 			// redundant now, could be useful in the future
 			this.objects.Clear ();
+		    this.sortedObjects.Clear();
 		}
 
 		protected void GameUpdate (int startTick)
@@ -172,7 +179,7 @@ namespace Aiv.Engine
 
 			this.workingGraphics.Clear (Color.Black);
 
-			foreach (GameObject obj in this.objectsToRender) {
+			foreach (GameObject obj in this.sortedObjects) {
 				obj.deltaTicks = startTick - obj.ticks;
 				obj.ticks = startTick;
 				if (!obj.enabled)
@@ -191,16 +198,26 @@ namespace Aiv.Engine
 			if (this.OnAfterUpdate != null)
 				OnAfterUpdate (this);
 
-
-
-			if (this.dirtyObjects) {
-				this.objectsToRender.Clear ();
-				foreach (GameObject obj in this.objects.Values.OrderBy(o=>o.order)) {
-					this.objectsToRender.Add (obj);
-				}
-				this.dirtyObjects = false;
-			}
-		}
+            if (this.dirtyObjects.Count > 0)
+            {
+                var newObjects = dirtyObjects.ToArray();
+                dirtyObjects.Clear();
+                foreach (KeyValuePair<GameObject, int> pair in newObjects)
+                {
+                    if (pair.Value == 1)
+                    {
+                        pair.Key.ticks = this.ticks;
+                        this.sortedObjects.Add(pair.Key);
+                    } else if (pair.Value == 0)
+                        this.sortedObjects.Remove(pair.Key);
+                    else if (pair.Value == 2) // order changed
+                    {
+                        this.sortedObjects.Remove(pair.Key);
+                        this.sortedObjects.Add(pair.Key);
+                    }
+                }
+            }
+        }
 
 		public virtual void Run ()
 		{
@@ -261,10 +278,10 @@ namespace Aiv.Engine
 			obj.name = name;
 			obj.engine = this;
 			obj.enabled = true;
-			this.objects [name] = obj;
+            obj.id = totalObjCount++;
+            this.objects [name] = obj;
+		    this.dirtyObjects[obj] = 1;
 			obj.Initialize ();
-			// force the rendering list to be rebuilt
-			this.dirtyObjects = true;
 		}
 		public void SpawnObject (GameObject obj)
 		{
@@ -274,17 +291,22 @@ namespace Aiv.Engine
 		public void RemoveObject (GameObject obj)
 		{
 			this.objects.Remove (obj.name);
-			this.dirtyObjects = true;
-		}
+		    this.dirtyObjects[obj] = 0;
+        }
 
-		/*
+        public void UpdatedObjectOrder(GameObject gameObject)
+        {
+            dirtyObjects[gameObject] = 2;
+        }
+
+        /*
 		 * 
 		 * 
 		 * Utility functions
 		 *
 		 */
 
-		public int Random (int start, int end)
+        public int Random (int start, int end)
 		{
 			return this.random.Next (start, end);
 		}

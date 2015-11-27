@@ -17,10 +17,22 @@ namespace Aiv.Engine
 		public int y;
 
 		// rendering order, lower values are rendered before
-		public int order;
+		private int _order;
+
+	    public int order
+	    {
+	        get { return _order; }
+	        set
+	        {
+	            _order = value;
+                if (engine != null) // if the object has been spawned
+	                engine.UpdatedObjectOrder(this);
+	        }
+	    }
 
 		public Engine engine;
 
+        public int id;
         public int deltaTicks;
         public int ticks;
 
@@ -58,10 +70,16 @@ namespace Aiv.Engine
 		public delegate void StartEventHandler(object sender);
 		public event StartEventHandler OnStart;
 
-		public delegate void UpdateEventHandler(object sender);
+        public delegate void BeforeUpdateEventHandler(object sender);
+        public event BeforeUpdateEventHandler OnBeforeUpdate;
+
+        public delegate void UpdateEventHandler(object sender);
 		public event UpdateEventHandler OnUpdate;
 
-		public delegate void EnableEventHandler(object sender);
+        public delegate void AfterUpdateEventHandler(object sender);
+        public event AfterUpdateEventHandler OnAfterUpdate;
+
+        public delegate void EnableEventHandler(object sender);
 		public event EnableEventHandler OnEnable;
 
 		public delegate void DisableEventHandler(object sender);
@@ -90,11 +108,18 @@ namespace Aiv.Engine
 				this.OnStart (this);
 		}
 
-		public virtual void Draw() {
-			this.Update();
+		public virtual void Draw()
+        {
+            if (this.OnBeforeUpdate != null)
+                this.OnBeforeUpdate(this);
+
+            this.Update();
 			if (this.OnUpdate != null)
 				this.OnUpdate (this);
-		}
+
+            if (this.OnAfterUpdate != null)
+                this.OnAfterUpdate(this);
+        }
 
 		// this is called when the GameObject is allocated
 		public virtual void Start()
@@ -196,6 +221,16 @@ namespace Aiv.Engine
 			return collisions;
 		}
 
-	}
-}
+    }
 
+    internal class GameObjectComparer : IComparer<GameObject>
+    {
+        public int Compare(GameObject x, GameObject y)
+        {
+            int result = y.order.CompareTo(x.order);
+            if (result == 0)
+                result = y.id.CompareTo(x.id);
+            return -1 * result;
+        }
+    }
+}

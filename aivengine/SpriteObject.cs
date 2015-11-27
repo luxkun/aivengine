@@ -104,7 +104,8 @@ namespace Aiv.Engine
 				Animate (this.currentAnimation);
 				return;
 			}
-			if (this.currentSprite != null) {
+			if (this.currentSprite != null)
+			{
 				this.engine.workingGraphics.DrawImageUnscaled (this.currentSprite.sprite, this.x, this.y);
 			}
 		}
