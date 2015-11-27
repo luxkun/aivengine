@@ -18,7 +18,7 @@ namespace Aiv.Engine
 	public class ParticleSystem : GameObject
 	{
 		// this is the max number of particles to have on screen for this system
-		public int maxParticles;
+		public int numberOfParticles;
 
 		public Color color;
 
@@ -37,10 +37,6 @@ namespace Aiv.Engine
 
 		// TODO choose what to do with spawn frequency
 
-		// type of particle spawn
-		// can be 'random', 'fixed', 'homogeneous'
-		public string direction;
-
 		// used for fixed
 		public int angle; // in degrees
 
@@ -48,14 +44,15 @@ namespace Aiv.Engine
 		public int fade = -1;
 
 
+        // function to create particles
+        public Action<ParticleSystem> spawnParticlesFunc;
 
-		// a spawn function for every type of particle
-		private static Dictionary<string, Action<ParticleSystem>> spawnParticlesMap = new Dictionary<string, Action<ParticleSystem>> {
-			// example: new ParticleSystem ("test", "homogeneous", 80, 800, Color.White, 2, 20, 2) { order = this.order, x = this.x, y = this.y, fade = 200 };
+        // a spawn function for every type of particle
+        private static Dictionary<string, Action<ParticleSystem>> spawnParticlesFuncMap = new Dictionary<string, Action<ParticleSystem>> {
 			{ "homogeneous", (ParticleSystem p) => 
 				{ 
-					float step = 360f / p.maxParticles;
-					for (int i = 0; i < p.maxParticles; i++) {
+					float step = 360f / p.numberOfParticles;
+					for (int i = 0; i < p.numberOfParticles; i++) {
 						float angleF = Utils.ConvertDegreeToRadians((int)(i * step));
 					    Dictionary<string, object> extraArgs = new Dictionary<string, object>
                         {
@@ -80,25 +77,24 @@ namespace Aiv.Engine
 					}
 				} 
 			},
-			// example: new ParticleSystem ("test", "fixed", 70, 5000, Color.Red, 10, 20, 5) { order = 9, x = 150, y = 450, angle = 0, fade = 0 };
 			{ "fixed", (ParticleSystem p) => 
 				{ 
 					int containerWidth = p.size*2 + p.padding*2;
 					int pCount = 0;
 					int index = 0;
 					float angleF = Utils.ConvertDegreeToRadians(p.angle);
-					double calcX = Math.Sin(angleF);
-					double calcY = Math.Cos(angleF);
+					float calcX = (float)Math.Sin(angleF);
+                    float calcY = (float)Math.Cos(angleF);
 					Tuple<int, int> lastPoint = null;
-					while (pCount < p.maxParticles) {
+                    while (pCount < p.numberOfParticles) {
 						Tuple<int, int> newPoint = Tuple.Create((int)(calcX * index), (int)(calcY * index));
 						// check if there is enough space between the last and the new point
 						if (lastPoint == null || (Math.Abs(newPoint.Item1 - lastPoint.Item1) + Math.Abs(newPoint.Item2 - lastPoint.Item2)) > containerWidth) {
 							lastPoint = newPoint;
-						    Dictionary<string, object> extraArgs = new Dictionary<string, object>
+                            Dictionary<string, object> extraArgs = new Dictionary<string, object>
                             {
                                 { "move_x", (float)Math.Cos(angleF) },
-                                { "move_y", (float)Math.Sin(angleF) },
+                                { "move_y", (float)Math.Sin(angleF) * -1 },
                                 { "move_speed", p.speed }
                             };
                             if (p.fade != -1)
@@ -117,9 +113,9 @@ namespace Aiv.Engine
                             p.engine.SpawnObject(particle.name, particle);
 							pCount++;
 						}
-						if (pCount == (p.maxParticles/2 + 1))
+						if (pCount == (p.numberOfParticles/2 + 1))
 							index = 0;
-						if (pCount > p.maxParticles/2)
+						if (pCount > p.numberOfParticles/2)
 							index--;
 						else 
 							index++;
@@ -202,25 +198,37 @@ namespace Aiv.Engine
                 x = owner.x + (int)bx;
                 y = owner.y + (int)by;
             }
-		}
+        }
 
-		public ParticleSystem (string name, string direction, int speed, int duration, Color color, int size, int maxParticles, int padding)
-		{
-			if (!spawnParticlesMap.ContainsKey (direction))
-				throw new NotImplementedException ($"Direction {direction} is not implemented in Aiv.Engine.ParticleSystem");
-			this.name = name;
-			this.direction = direction;
-			this.speed = speed;
-			this.duration = duration;
-			this.color = color;
-			this.size = size;
-			this.maxParticles = maxParticles;
-			this.padding = padding;
-		}
+        public ParticleSystem(string name, string typeOfParticles, int numberOfParticles, int size, Color color, int duration, int speed, int padding)
+        {
+            if (!spawnParticlesFuncMap.ContainsKey(typeOfParticles))
+                throw new NotImplementedException($"Type of particle {typeOfParticles} is not implemented in Aiv.Engine.ParticleSystem");
+            Init(name, spawnParticlesFuncMap[typeOfParticles], numberOfParticles, size, color, duration, speed, padding);
+        }
 
-		public override void Start () 
+	    public ParticleSystem(string name, Action<ParticleSystem> spawnParticlesFunc, int numberOfParticles, int size,
+	        Color color, int duration, int speed, int padding)
+        {
+            Init(name, spawnParticlesFunc, numberOfParticles, size, color, duration, speed, padding);
+        }
+
+	    private void Init(string name, Action<ParticleSystem> spawnParticlesFunc, int numberOfParticles, int size,
+	        Color color, int duration, int speed, int padding)
+        {
+            this.name = name;
+            this.spawnParticlesFunc = spawnParticlesFunc;
+            this.speed = speed;
+            this.duration = duration;
+            this.color = color;
+            this.size = size;
+            this.numberOfParticles = numberOfParticles;
+            this.padding = padding;
+        }
+
+        public override void Start () 
 		{
-			spawnParticlesMap [direction] (this);
+			spawnParticlesFunc(this);
 		}
 	}
 }
