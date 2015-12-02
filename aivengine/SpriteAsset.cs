@@ -18,7 +18,6 @@ namespace Aiv.Engine
 
 		public SpriteAsset (string fileName) : base(fileName)
 		{
-            Debug.WriteLine("Loading bitmap: " + fileName);
 			this.sprite = new Bitmap (this.fileName);
 		}
 

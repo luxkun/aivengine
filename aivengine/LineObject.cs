@@ -6,6 +6,7 @@ Copyright 2015 Aiv S.r.l.
 */
 
 using System;
+using System.Collections.Generic;
 using Aiv.Engine;
 using System.Drawing;
 
@@ -81,5 +82,21 @@ namespace Aiv.Engine
 			this.engine.workingGraphics.DrawLine (this.pen, this.x, this.y, this.x, this.y + length);
 		}
 	}
+
+    public class MultipleRayObject : RayObject
+    {
+        // must have at least 2 points
+        public List<Tuple<int, int>> points;
+        public override void Draw()
+        {
+            base.Draw();
+            for (int i = 1; i < points.Count; i++)
+            {
+                this.engine.workingGraphics.DrawLine(
+                    this.pen, this.points[i - 1].Item1, this.points[i - 1].Item2, 
+                    this.points[i].Item1, this.points[i].Item2);
+            }
+        }
+    }
 }
 

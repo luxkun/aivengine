@@ -43,7 +43,6 @@ namespace Aiv.Engine
 		// ms after the bullets should start to fade
 		public int fade = -1;
 
-
         // function to create particles
         public Action<ParticleSystem> spawnParticlesFunc;
 
@@ -199,6 +198,11 @@ namespace Aiv.Engine
                 y = owner.y + (int)by;
             }
         }
+        // simple constructor, more similiar to other classes
+	    public ParticleSystem()
+	    {
+	        Init("", spawnParticlesFuncMap["homogeneous"], 10, 2, Color.White, 1000, 10, 4);
+	    }
 
         public ParticleSystem(string name, string typeOfParticles, int numberOfParticles, int size, Color color, int duration, int speed, int padding)
         {
