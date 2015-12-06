@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Drawing;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Linq;
@@ -36,14 +37,26 @@ namespace Aiv.Engine
 	    public int totalObjCount;
 
         public int startTicks;
-
+        
+        // keeping ticks for backward compatibility
 		public int ticks {
 			get {
 				return Environment.TickCount;
 			}
 		}
 
-		public delegate void BeforeUpdateEventHandler (object sender);
+        private Stopwatch watch;
+        // this is the prefered method to track time
+        private float _deltaTime;
+        public float deltaTime
+        {
+            get
+            {
+                return _deltaTime;
+            }
+        }
+
+        public delegate void BeforeUpdateEventHandler (object sender);
 
 		public event BeforeUpdateEventHandler OnBeforeUpdate;
 
@@ -133,7 +146,9 @@ namespace Aiv.Engine
 
 			this.joysticks = new Joystick[8];
 
-		}
+            this.watch = new Stopwatch();
+
+        }
 
 		protected Engine ()
 		{
@@ -157,7 +172,7 @@ namespace Aiv.Engine
 			this.window.KeyUp += new KeyEventHandler (this.KeyUp);
 			this.mouse = new Mouse (this);
 
-		}
+        }
 
 
 		public void DestroyAllObjects ()
@@ -172,9 +187,17 @@ namespace Aiv.Engine
 
 		protected void GameUpdate (int startTick)
 		{
-			
 
-			if (this.OnBeforeUpdate != null)
+            if (!this.watch.IsRunning)
+                this.watch.Start();
+
+            // should this be at the end of the function?
+            this._deltaTime = (float)this.watch.Elapsed.TotalSeconds;
+
+            this.watch.Reset();
+            this.watch.Start();
+
+            if (this.OnBeforeUpdate != null)
 				OnBeforeUpdate (this);
 
 			this.workingGraphics.Clear (Color.Black);
@@ -182,6 +205,7 @@ namespace Aiv.Engine
 			foreach (GameObject obj in this.sortedObjects) {
 				obj.deltaTicks = startTick - obj.ticks;
 				obj.ticks = startTick;
+			    obj.deltaTime = _deltaTime;
 				if (!obj.enabled)
 					continue;
 				obj.Draw ();

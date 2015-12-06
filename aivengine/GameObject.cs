@@ -35,11 +35,13 @@ namespace Aiv.Engine
         public int id;
         public int deltaTicks;
         public int ticks;
+        public float deltaTime;
 
-		public Dictionary<string, HitBox> hitBoxes;
+        public Dictionary<string, HitBox> hitBoxes;
 
 		private bool _enabled = false;
-		public bool enabled {
+
+	    public bool enabled {
 			get {
 				return _enabled;
 			}
