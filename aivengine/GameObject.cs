@@ -19,7 +19,7 @@ namespace Aiv.Engine
 		// rendering order, lower values are rendered before
 		private int _order;
 
-	    public int order
+	    public virtual int order
 	    {
 	        get { return _order; }
 	        set
@@ -41,7 +41,7 @@ namespace Aiv.Engine
 
 		private bool _enabled = false;
 
-	    public bool enabled {
+	    public virtual bool enabled {
 			get {
 				return _enabled;
 			}
@@ -98,6 +98,7 @@ namespace Aiv.Engine
 			// call event handlers
 			if (this.OnDestroy != null)
 				OnDestroy (this);
+		    this.enabled = false;
 			
 			if (this.engine != null) {
 				this.engine.RemoveObject (this);

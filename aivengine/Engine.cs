@@ -129,7 +129,7 @@ namespace Aiv.Engine
 
 			this.workingBitmap = new Bitmap (width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 			this.workingGraphics = Graphics.FromImage (this.workingBitmap);
-			this.workingGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+			this.workingGraphics.TextRenderingHint = TextRenderingHint.AntiAlias;
 			this.workingGraphics.CompositingQuality = CompositingQuality.HighSpeed;
 			this.workingGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
 			this.workingGraphics.PixelOffsetMode = PixelOffsetMode.HighSpeed;
@@ -202,8 +202,9 @@ namespace Aiv.Engine
 
 			this.workingGraphics.Clear (Color.Black);
 
-			foreach (GameObject obj in this.sortedObjects) {
-				obj.deltaTicks = startTick - obj.ticks;
+			foreach (GameObject obj in this.sortedObjects)
+			{
+                obj.deltaTicks = startTick - obj.ticks;
 				obj.ticks = startTick;
 			    obj.deltaTime = _deltaTime;
 				if (!obj.enabled)
