@@ -62,7 +62,7 @@ namespace Aiv.Engine
 				_currentSprite = value;
 			}
 		}
-
+        
 		public int width = 0;
 		public int height = 0;
 
@@ -100,6 +100,8 @@ namespace Aiv.Engine
 		public override void Draw ()
 		{
 			base.Draw ();
+            if (!CanDraw)
+                return;
 			if (this.currentAnimation != null) {
 				Animate (this.currentAnimation);
 				return;

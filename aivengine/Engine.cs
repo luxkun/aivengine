@@ -45,7 +45,12 @@ namespace Aiv.Engine
 			}
 		}
 
-        private Stopwatch watch;
+        // time modifier for deltaTime and deltaTicks
+	    public float TimeModifier { get; set; } = 1f;
+
+        public bool ClearEveryFrame { get; set; } = true;
+
+	    private Stopwatch watch;
         // this is the prefered method to track time
         private float _deltaTime;
         public float deltaTime
@@ -118,7 +123,7 @@ namespace Aiv.Engine
 
 		private MainWindow window;
 
-		protected void Initialize (string windowName, int width, int height, int fps)
+	    protected void Initialize (string windowName, int width, int height, int fps)
 		{
 			
 
@@ -192,7 +197,7 @@ namespace Aiv.Engine
                 this.watch.Start();
 
             // should this be at the end of the function?
-            this._deltaTime = (float)this.watch.Elapsed.TotalSeconds;
+            this._deltaTime = (float)this.watch.Elapsed.TotalSeconds * TimeModifier;
 
             this.watch.Reset();
             this.watch.Start();
@@ -200,11 +205,12 @@ namespace Aiv.Engine
             if (this.OnBeforeUpdate != null)
 				OnBeforeUpdate (this);
 
+            if (ClearEveryFrame)
 			this.workingGraphics.Clear (Color.Black);
 
 			foreach (GameObject obj in this.sortedObjects)
 			{
-                obj.deltaTicks = startTick - obj.ticks;
+                obj.deltaTicks = (int) ((startTick - obj.ticks) * TimeModifier);
 				obj.ticks = startTick;
 			    obj.deltaTime = _deltaTime;
 				if (!obj.enabled)

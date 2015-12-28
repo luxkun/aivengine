@@ -87,11 +87,18 @@ namespace Aiv.Engine
 		public delegate void DisableEventHandler(object sender);
 		public event DisableEventHandler OnDisable;
 
+        // if true then all objects before this do not need to get redrawn every frame
+        public bool BaseObject { get; set; }
+        public bool CanDraw { get; set; } = true;
 
-		public GameObject ()
+        public TimerManager Timer { get; private set; }
+
+        public GameObject ()
 		{
 			this.x = 0;
 			this.y = 0;
+
+            Timer = new TimerManager(this);
 		}
 
 		public void Destroy() {
@@ -132,10 +139,11 @@ namespace Aiv.Engine
 		// this is called by the game loop at every cycle
 		public virtual void Update()
 		{
-		}
+            Timer.Update();
+        }
 
-		// every subclass should override this
-		public virtual GameObject Clone() {
+        // every subclass should override this
+        public virtual GameObject Clone() {
 			GameObject go = new GameObject ();
 			go.name = this.name;
 			go.x = this.x;
@@ -184,6 +192,11 @@ namespace Aiv.Engine
 				// no collision
 				return false;
 			}
+
+            public HitBox Clone()
+            {
+                return (HitBox)MemberwiseClone();
+            }
 		}
 
 		public class Collision {
