@@ -32,7 +32,11 @@ namespace Aiv.Engine
 			string text = this.text;
 			if (text == null)
 				text = "";
-			this.engine.workingGraphics.DrawString (text, this.font, this.brush, this.x, this.y);
+			this.engine.workingGraphics.DrawString (
+                text, this.font, this.brush, 
+                this.x - (this.ignoreCamera ? 0 : engine.Camera.X), 
+                this.y - (this.ignoreCamera ? 0 : engine.Camera.Y)
+                );
 		}
 
 		public override GameObject Clone ()

@@ -26,6 +26,8 @@ namespace Aiv.Engine
 		public int width;
 		public int height;
 
+        public Camera Camera { get; set; }
+
 		public Dictionary<string, GameObject> objects;
 		public Dictionary<string, Asset> assets;
 
@@ -131,8 +133,9 @@ namespace Aiv.Engine
 			this.height = height;
 			this.fps = fps;
 
+            this.Camera = new Camera();
 
-			this.workingBitmap = new Bitmap (width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            this.workingBitmap = new Bitmap (width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 			this.workingGraphics = Graphics.FromImage (this.workingBitmap);
 			this.workingGraphics.TextRenderingHint = TextRenderingHint.AntiAlias;
 			this.workingGraphics.CompositingQuality = CompositingQuality.HighSpeed;
@@ -206,7 +209,7 @@ namespace Aiv.Engine
 				OnBeforeUpdate (this);
 
             if (ClearEveryFrame)
-			this.workingGraphics.Clear (Color.Black);
+			    this.workingGraphics.Clear (Color.Black);
 
 			foreach (GameObject obj in this.sortedObjects)
 			{
@@ -220,7 +223,9 @@ namespace Aiv.Engine
 					Pen green = new Pen (Color.Green);
 					if (obj.hitBoxes != null) {
 						foreach (GameObject.HitBox hitBox in obj.hitBoxes.Values) {
-							this.workingGraphics.DrawRectangle (green, obj.x + hitBox.x, obj.y + hitBox.y, hitBox.width, hitBox.height);
+							this.workingGraphics.DrawRectangle (
+                                green, obj.x + hitBox.x - (obj.ignoreCamera ? 0 : Camera.X), 
+                                obj.y + hitBox.y - (obj.ignoreCamera ? 0 : Camera.Y), hitBox.width, hitBox.height);
 						}
 					}
 				}
@@ -342,10 +347,11 @@ namespace Aiv.Engine
 			return this.random.Next (start, end);
 		}
 
-		public virtual void PlaySound (string assetName)
+		public virtual object PlaySound (string assetName, float volume = 1f)
 		{
 			SoundPlayer soundPlayer = new SoundPlayer (this.GetAsset (assetName).fileName);
 			soundPlayer.Play ();
+            return soundPlayer;
 		}
 
 	    public virtual void FullScreen()
@@ -355,11 +361,12 @@ namespace Aiv.Engine
 	        window.FormBorderStyle = FormBorderStyle.None;
 	    }
 
-		public virtual void PlaySoundLoop (string assetName)
+		public virtual object PlaySoundLoop (string assetName, float volume = 1f)
 		{
 			SoundPlayer soundPlayer = new SoundPlayer (this.GetAsset (assetName).fileName);
 			soundPlayer.PlayLooping ();
-		}
+            return soundPlayer;
+        }
 
 		/*
 		 * 

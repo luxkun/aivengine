@@ -23,9 +23,13 @@ namespace Aiv.Engine
 			base.Draw ();
 			if (pen == null)
 				pen = new Pen (color);
-			this.engine.workingGraphics.DrawRectangle (pen, this.x, this.y, this.width, this.height);
+            var cameraX = (this.ignoreCamera ? 0 : engine.Camera.X);
+            var cameraY = (this.ignoreCamera ? 0 : engine.Camera.Y);
+            this.engine.workingGraphics.DrawRectangle (
+                pen, this.x - cameraX, this.y - cameraY, this.width, this.height);
 			if (this.fill)
-				this.engine.workingGraphics.FillRectangle (pen.Brush, this.x, this.y, this.width, this.height);
+				this.engine.workingGraphics.FillRectangle (
+                    pen.Brush, this.x - cameraX, this.y - cameraY, this.width, this.height);
 		}
 
 		public override GameObject Clone ()

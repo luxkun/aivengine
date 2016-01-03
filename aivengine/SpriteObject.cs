@@ -41,7 +41,7 @@ namespace Aiv.Engine
 			}
 		}
 
-		private Dictionary<string, Animation> animations;
+		public Dictionary<string, Animation> animations;
 
 		public string currentAnimation;
 
@@ -55,11 +55,12 @@ namespace Aiv.Engine
 				if (value == null) {
 					width = 0;
 					height = 0;
-				}
-				Bitmap sprite = value.sprite;
-				width = sprite.Width;
-				height = sprite.Height;
-				_currentSprite = value;
+				} else { 
+				    Bitmap sprite = value.sprite;
+				    width = sprite.Width;
+				    height = sprite.Height;
+                }
+                _currentSprite = value;
 			}
 		}
         
@@ -94,9 +95,13 @@ namespace Aiv.Engine
 			Bitmap spriteToDraw = animation.sprites [animation.currentFrame].sprite;
 			this.width = spriteToDraw.Width;
 			this.height = spriteToDraw.Height;
-			this.engine.workingGraphics.DrawImageUnscaled (spriteToDraw, this.x, this.y);
-		}
-
+            var cameraX = (this.ignoreCamera ? 0 : engine.Camera.X);
+            var cameraY = (this.ignoreCamera ? 0 : engine.Camera.Y);
+            this.engine.workingGraphics.DrawImageUnscaled(
+                spriteToDraw, this.x - cameraX, this.y - cameraY
+                );
+        }
+        
 		public override void Draw ()
 		{
 			base.Draw ();
@@ -107,13 +112,20 @@ namespace Aiv.Engine
 				return;
 			}
 			if (this.currentSprite != null)
-			{
-				this.engine.workingGraphics.DrawImageUnscaled (this.currentSprite.sprite, this.x, this.y);
+            {
+                var cameraX = (this.ignoreCamera ? 0 : engine.Camera.X);
+                var cameraY = (this.ignoreCamera ? 0 : engine.Camera.Y);
+                this.engine.workingGraphics.DrawImageUnscaled (
+                    this.currentSprite.sprite, this.x - cameraX, this.y - cameraY
+                    );
 			}
 		}
 
-		public Animation AddAnimation (string name, IEnumerable<string> assets, int fps)
+        // optional engine param to add animations before spawning the SpriteObject
+		public Animation AddAnimation (string name, IEnumerable<string> assets, int fps, Engine engine = null)
 		{
+            if (engine == null)
+                engine = this.engine;
 			// allocate animations dictionary on demand
 			if (this.animations == null) {
 				this.animations = new Dictionary<string, Animation> ();
@@ -122,12 +134,12 @@ namespace Aiv.Engine
 			animation.fps = fps;
 			animation.sprites = new List<SpriteAsset> ();
 			foreach (string asset in assets) {
-				animation.sprites.Add ((SpriteAsset)this.engine.GetAsset (asset));
+				animation.sprites.Add ((SpriteAsset)engine.GetAsset (asset));
 			}
 			animation.currentFrame = 0;
 			// force the first frame to be drawn
 			animation.lastTick = 0;
-			animation.loop = false;
+			animation.loop = true;
 			animation.oneShot = false;
 			animation.owner = this;
 			this.animations [name] = animation;

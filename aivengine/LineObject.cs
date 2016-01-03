@@ -27,7 +27,12 @@ namespace Aiv.Engine
 			base.Draw ();
 			if (pen == null)
 				pen = new Pen (color, width);
-			this.engine.workingGraphics.DrawLine (pen, this.x, this.y, this.x2, this.y2);
+            var cameraX = (this.ignoreCamera ? 0 : engine.Camera.X);
+            var cameraY = (this.ignoreCamera ? 0 : engine.Camera.Y);
+            this.engine.workingGraphics.DrawLine (
+                pen, this.x - cameraX, this.y - cameraY, 
+                this.x2 - cameraX, this.y2 - cameraY
+                );
 		}
 
 		public override GameObject Clone ()
@@ -72,7 +77,11 @@ namespace Aiv.Engine
 		public override void Draw ()
 		{
 			base.Draw ();
-			this.engine.workingGraphics.DrawLine (this.pen, this.x, this.y, this.x + length, this.y);
+            var cameraX = (this.ignoreCamera ? 0 : engine.Camera.X);
+            var cameraY = (this.ignoreCamera ? 0 : engine.Camera.Y);
+            this.engine.workingGraphics.DrawLine (
+                this.pen, this.x - cameraX, this.y - engine.Camera.Y, this.x + length - cameraX, this.y - engine.Camera.Y
+                );
 		}
 	}
 
@@ -82,7 +91,12 @@ namespace Aiv.Engine
 		public override void Draw ()
 		{
 			base.Draw ();
-			this.engine.workingGraphics.DrawLine (this.pen, this.x, this.y, this.x, this.y + length);
+            var cameraX = (this.ignoreCamera ? 0 : engine.Camera.X);
+            var cameraY = (this.ignoreCamera ? 0 : engine.Camera.Y);
+            this.engine.workingGraphics.DrawLine (
+                this.pen, this.x - cameraX, this.y - cameraY, 
+                this.x - cameraX, this.y + length - cameraY
+                );
 		}
 	}
 
@@ -99,12 +113,14 @@ namespace Aiv.Engine
         public override void Draw()
         {
             base.Draw();
+            var cameraX = (this.ignoreCamera ? 0 : engine.Camera.X);
+            var cameraY = (this.ignoreCamera ? 0 : engine.Camera.Y);
             for (int i = 1; i < points.Count; i++)
             {
                     this.engine.workingGraphics.DrawLine(
-                        this.pen, this.x + this.points[i - 1].Item1,
-                        this.y + this.points[i - 1].Item2,
-                        this.x + this.points[i].Item1, this.y + this.points[i].Item2);
+                        this.pen, this.x + this.points[i - 1].Item1 - cameraX,
+                        this.y + this.points[i - 1].Item2 - cameraY,
+                        this.x + this.points[i].Item1 - cameraX, this.y + this.points[i].Item2 - cameraY);
             }
         }
 

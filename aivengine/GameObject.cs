@@ -16,6 +16,8 @@ namespace Aiv.Engine
 		public int x;
 		public int y;
 
+        public bool ignoreCamera = false;
+
 		// rendering order, lower values are rendered before
 		private int _order;
 
@@ -179,10 +181,10 @@ namespace Aiv.Engine
 			}
 
 			public bool CollideWith(HitBox other) {
-				int x1 = this.owner.x + this.x;
-				int y1 = this.owner.y + this.y;
-				int x2 = other.owner.x + other.x;
-				int y2 = other.owner.y + other.y;
+				int x1 = this.owner.x + this.x - (this.owner.ignoreCamera ? 0 : this.owner.engine.Camera.X);
+				int y1 = this.owner.y + this.y - (this.owner.ignoreCamera ? 0 : this.owner.engine.Camera.Y);
+				int x2 = other.owner.x + other.x - (this.owner.ignoreCamera ? 0 : this.owner.engine.Camera.X);
+				int y2 = other.owner.y + other.y - (this.owner.ignoreCamera ? 0 : this.owner.engine.Camera.Y);
 				// simple rectangle collision check
 				if (x1 + this.width >= x2 &&
 				    x1 <= (x2 + other.width) &&

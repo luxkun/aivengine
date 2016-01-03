@@ -22,9 +22,17 @@ namespace Aiv.Engine
 			base.Draw ();
 			if (pen == null)
 				pen = new Pen (color);
-			this.engine.workingGraphics.DrawEllipse (pen, this.x, this.y, radius * 2, radius * 2);
+            var cameraX = (this.ignoreCamera ? 0 : engine.Camera.X);
+            var cameraY = (this.ignoreCamera ? 0 : engine.Camera.Y);
+            this.engine.workingGraphics.DrawEllipse (
+                pen, this.x - cameraX, 
+                this.y - cameraY, 
+                radius * 2,
+                radius * 2
+                );
 			if (this.fill)
-				this.engine.workingGraphics.FillEllipse (pen.Brush, this.x, this.y, radius * 2, radius * 2);
+				this.engine.workingGraphics.FillEllipse (
+                    pen.Brush, this.x - cameraX, this.y - cameraY, radius * 2, radius * 2);
 				
 		}
 
