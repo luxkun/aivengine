@@ -2,27 +2,28 @@
 
 Copyright 2015 20tab S.r.l.
 Copyright 2015 Aiv S.r.l.
+Forked by Luciano Ferraro
 
 */
 
-using System;
 using System.IO;
 
 namespace Aiv.Engine
 {
-	public class Asset
-	{
+    public class Asset
+    {
+        public static string BasePath = "";
 
-		public static string basePath = "";
+        public Asset(string fileName)
+        {
+            BaseFileName = fileName;
+            FileName = Path.Combine(BasePath, fileName);
+        }
 
-		public string name;
-		public string fileName;
-		public Engine engine;
+        public string Name { get; set; }
 
-		public Asset (string fileName)
-		{
-			this.fileName = Path.Combine(basePath, fileName);
-		}
-	}
+        public string FileName { get; private set; }
+        public string BaseFileName { get; private set; }
+        public Engine Engine { get; internal set; }
+    }
 }
-

@@ -1,31 +1,27 @@
-﻿namespace Aiv.Engine
+﻿/*
+
+Luciano Ferraro
+
+*/
+
+namespace Aiv.Engine
 {
     public class Camera : GameObject
     {
+        public GameObject LinkedObject { get; set; } = null;
 
-        public bool IsDrawable(GameObject gameObject)
-        {
-            // TODO: do it
-            return true;
-        }
+        public float X { get; set; }
+
+        public float Y { get; set; }
 
         public override void Update()
         {
             base.Update();
             if (LinkedObject != null)
             {
-                X = LinkedObject.x;
-                Y = LinkedObject.y;
+                X = LinkedObject.X;
+                Y = LinkedObject.Y;
             }
         }
-
-        public GameObject LinkedObject
-        {
-            get; set;
-        } = null;
-
-        public int X { get; set; }
-
-        public int Y { get; set; }
     }
 }

@@ -2,105 +2,64 @@
 
 Copyright 2015 20tab S.r.l.
 Copyright 2015 Aiv S.r.l.
+Forked by Luciano Ferraro
 
 */
 
 using System;
 using System.Collections.Generic;
-using Aiv.Engine;
 using System.Drawing;
 using System.Linq;
+using Aiv.Fast2D;
+using OpenTK;
 
 namespace Aiv.Engine
 {
-	public class LineObject : GameObject
-	{
-		public int x2;
-		public int y2;
-		public Color color;
-	    public int width = 1;
+    public class LineObject : GameObject
+    {
+        public LineObject(Vector2 from, Vector2 to)
+        {
+            var width = to.X - from.X;
+            var height = to.Y - from.Y;
+            Line = new Line((int) width, (int) height);
+            From = from;
+            To = to;
+        }
 
-		private Pen pen;
+        public Color Color
+        {
+            get { return Line.Color; }
+            set { Line.Color = value; }
+        }
 
-		public override void Draw ()
-		{
-			base.Draw ();
-			if (pen == null)
-				pen = new Pen (color, width);
-            var cameraX = (this.ignoreCamera ? 0 : engine.Camera.X);
-            var cameraY = (this.ignoreCamera ? 0 : engine.Camera.Y);
-            this.engine.workingGraphics.DrawLine (
-                pen, this.x - cameraX, this.y - cameraY, 
-                this.x2 - cameraX, this.y2 - cameraY
-                );
-		}
+        public Line Line { get; }
 
-		public override GameObject Clone ()
-		{
-			LineObject go = (LineObject)base.Clone ();
-			go.x2 = this.x2;
-			go.y2 = this.y2;
-			go.color = this.color;
-			return go;
-		}
-	}
+        public Vector2 From
+        {
+            get { return Line.From; }
+            set { Line.From = value; }
+        }
 
-	public class RayObject : GameObject
-	{
-		
-		public int length;
-        public int width = 1;
+        public Vector2 To
+        {
+            get { return Line.To; }
+            set { Line.To = value; }
+        }
 
-        public Color color;
+        public override void Draw()
+        {
+            base.Draw();
+            Line.Draw();
+        }
 
-		protected Pen pen;
+        public override GameObject Clone()
+        {
+            var go = (LineObject) MemberwiseClone();
+            return go;
+        }
+    }
 
-		public override void Draw ()
-		{
-			base.Draw ();
-			if (pen == null)
-				pen = new Pen (color, width);
-		}
-
-		public override GameObject Clone ()
-		{
-			RayObject go = (RayObject)base.Clone ();
-			go.length = this.length;
-			go.color = this.color;
-			return go;
-		}
-	}
-
-	public class HorizontalRayObject : RayObject
-	{
-		
-		public override void Draw ()
-		{
-			base.Draw ();
-            var cameraX = (this.ignoreCamera ? 0 : engine.Camera.X);
-            var cameraY = (this.ignoreCamera ? 0 : engine.Camera.Y);
-            this.engine.workingGraphics.DrawLine (
-                this.pen, this.x - cameraX, this.y - engine.Camera.Y, this.x + length - cameraX, this.y - engine.Camera.Y
-                );
-		}
-	}
-
-	public class VerticalRayObject : RayObject
-	{
-
-		public override void Draw ()
-		{
-			base.Draw ();
-            var cameraX = (this.ignoreCamera ? 0 : engine.Camera.X);
-            var cameraY = (this.ignoreCamera ? 0 : engine.Camera.Y);
-            this.engine.workingGraphics.DrawLine (
-                this.pen, this.x - cameraX, this.y - cameraY, 
-                this.x - cameraX, this.y + length - cameraY
-                );
-		}
-	}
-
-    public class MultipleRayObject : RayObject
+    public class MultipleRayObject : GameObject
     {
         // must have at least 2 points
         public List<Tuple<int, int>> points;
@@ -110,28 +69,32 @@ namespace Aiv.Engine
             points = new List<Tuple<int, int>>();
         }
 
+        public float Width { get; set; }
+        public bool Fill { get; set; }
+        public Color Color { get; set; }
+
         public override void Draw()
         {
             base.Draw();
-            var cameraX = (this.ignoreCamera ? 0 : engine.Camera.X);
-            var cameraY = (this.ignoreCamera ? 0 : engine.Camera.Y);
-            for (int i = 1; i < points.Count; i++)
+            var cameraX = IgnoreCamera ? 0 : Engine.Camera.X;
+            var cameraY = IgnoreCamera ? 0 : Engine.Camera.Y;
+            for (var i = 1; i < points.Count; i++)
             {
-                    this.engine.workingGraphics.DrawLine(
-                        this.pen, this.x + this.points[i - 1].Item1 - cameraX,
-                        this.y + this.points[i - 1].Item2 - cameraY,
-                        this.x + this.points[i].Item1 - cameraX, this.y + this.points[i].Item2 - cameraY);
+                var line = new LineObject(
+                    new Vector2(X + points[i - 1].Item1 - cameraX, Y + points[i - 1].Item2 - cameraY),
+                    new Vector2(X + points[i].Item1 - cameraX, Y + points[i].Item2 - cameraY))
+                {
+                    Color = Color
+                };
+                line.Draw();
             }
         }
 
         public override GameObject Clone()
         {
-            MultipleRayObject go = (MultipleRayObject)base.Clone();
-            go.length = this.length;
-            go.color = this.color;
+            var go = (MultipleRayObject) MemberwiseClone();
             go.points = points.ToList();
             return go;
         }
     }
 }
-

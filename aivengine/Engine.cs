@@ -2,332 +2,300 @@
 
 Copyright 2015 20tab S.r.l.
 Copyright 2015 Aiv S.r.l.
+Forked by Luciano Ferraro 
 
 */
 
+#define FAST2D
+
 using System;
-using System.Windows.Forms;
-using System.Threading;
-using System.Drawing;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing.Drawing2D;
-using System.Drawing.Text;
+using System.Drawing;
 using System.Linq;
-using System.Media;
+using System.Threading;
+using Aiv.Fast2D;
+using Aiv.Vorbis;
+using NVorbis.OpenTKSupport;
+using OpenTK.Audio;
 
 namespace Aiv.Engine
 {
-	public class Engine
-	{
-		
-		public int fps;
+    public class Engine
+    {
+        public delegate void AfterUpdateEventHandler(object sender);
 
-		public int width;
-		public int height;
+        public delegate void BeforeUpdateEventHandler(object sender);
 
-        public Camera Camera { get; set; }
-
-		public Dictionary<string, GameObject> objects;
-		public Dictionary<string, Asset> assets;
-
-		// this is constantly filled with keyboard status
-		private Dictionary<Keys, bool> keyboardTable;
-
-		public SortedSet<GameObject> sortedObjects;
-
-	    public int totalObjCount;
-
-        public int startTicks;
+        public const float MaxDeltaTime = 0.33f;
         
-        // keeping ticks for backward compatibility
-		public int ticks {
-			get {
-				return Environment.TickCount;
-			}
-		}
-
-        // time modifier for deltaTime and deltaTicks
-	    public float TimeModifier { get; set; } = 1f;
-
-        public bool ClearEveryFrame { get; set; } = true;
-
-	    private Stopwatch watch;
-        // this is the prefered method to track time
-        private float _deltaTime;
-        public float deltaTime
-        {
-            get
-            {
-                return _deltaTime;
-            }
-        }
-
-        public delegate void BeforeUpdateEventHandler (object sender);
-
-		public event BeforeUpdateEventHandler OnBeforeUpdate;
-
-		public delegate void AfterUpdateEventHandler (object sender);
-
-		public event AfterUpdateEventHandler OnAfterUpdate;
+        public bool debugCollisions;
+        private Dictionary<GameObject.HitBox, RectangleObject> debugCollisionsBoxes;
 
         // objects that need to be added (1) or removed (0) from sortedObjects
         // objects that have changed order (2)
         private Dictionary<GameObject, int> dirtyObjects;
 
-        protected Bitmap workingBitmap;
-		public Graphics workingGraphics;
+        private int totalObjCount;
 
-		public bool isGameRunning = false;
+        private readonly Window Window;
 
-		private Random random;
-
-		public bool debugCollisions;
-
-		public Mouse mouse;
-		public Joystick[] joysticks;
-
-		private class MainWindow : Form
-		{
-
-			public Graphics windowGraphics;
-			public PictureBox pbox;
-
-			public MainWindow ()
-			{
-
-				StartPosition = FormStartPosition.CenterScreen;
-				FormBorderStyle = FormBorderStyle.FixedSingle;
-				MaximizeBox = false;
-				MinimizeBox = false;
-
-                
-				this.SetStyle (ControlStyles.AllPaintingInWmPaint, true);
-				this.SetStyle (ControlStyles.OptimizedDoubleBuffer, true);
-                // needed to be true since AllPaintingInWmPaint and OptimizedDoubleBuffer are true
-                this.SetStyle (ControlStyles.UserPaint, true);
-                this.SetStyle (ControlStyles.CacheText, true);
-                this.SetStyle (ControlStyles.FixedWidth, true);
-				this.SetStyle (ControlStyles.FixedHeight, true);
-
-				this.pbox = new PictureBox ();
-				this.Controls.Add (pbox);
-
-				this.windowGraphics = pbox.CreateGraphics ();
-				this.windowGraphics.CompositingMode = CompositingMode.SourceCopy;
-				this.windowGraphics.CompositingQuality = CompositingQuality.HighSpeed;
-				this.windowGraphics.SmoothingMode = SmoothingMode.None;
-				this.windowGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-				this.windowGraphics.TextRenderingHint = TextRenderingHint.SystemDefault;
-				this.windowGraphics.PixelOffsetMode = PixelOffsetMode.HighSpeed;
-			}
-		}
-
-		private MainWindow window;
-
-	    protected void Initialize (string windowName, int width, int height, int fps)
-		{
-			
-
-			this.width = width;
-			this.height = height;
-			this.fps = fps;
-
-            this.Camera = new Camera();
-
-            this.workingBitmap = new Bitmap (width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-			this.workingGraphics = Graphics.FromImage (this.workingBitmap);
-			this.workingGraphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-			this.workingGraphics.CompositingQuality = CompositingQuality.HighSpeed;
-			this.workingGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-			this.workingGraphics.PixelOffsetMode = PixelOffsetMode.HighSpeed;
-
-			// create dictionaries
-			this.objects = new Dictionary<string, GameObject> ();
-			this.sortedObjects = new SortedSet<GameObject>(new GameObjectComparer());
-			this.assets = new Dictionary<string, Asset> ();
-			this.keyboardTable = new Dictionary<Keys, bool> ();
-
-            this.dirtyObjects = new Dictionary<GameObject, int>();
-
-            this.random = new Random (Guid.NewGuid ().GetHashCode ());
-
-			this.joysticks = new Joystick[8];
-
-            this.watch = new Stopwatch();
-
+        protected Engine()
+        {
         }
 
-		protected Engine ()
-		{
-		}
+        public Engine(string windowName, int width, int height, int fps, bool fullscreen)
+        {
+            Initialize();
 
-		public Engine (string windowName, int width, int height, int fps)
-		{
-			
-
-			this.Initialize (windowName, width, height, fps);
-
-			this.window = new MainWindow ();
-			this.window.Text = windowName;
-			this.window.Size = new Size (width, height);
-			Size clientSize = this.window.ClientSize;
-			int deltaW = width - clientSize.Width;
-			int deltaH = height - clientSize.Height;
-			this.window.Size = new Size (width + deltaW, height + deltaH);
-			this.window.pbox.Size = new Size (width, height);
-			this.window.KeyDown += new KeyEventHandler (this.KeyDown);
-			this.window.KeyUp += new KeyEventHandler (this.KeyUp);
-			this.mouse = new Mouse (this);
-
+            // FPS?
+            Window = new Window(width, height, windowName, fullscreen);
         }
 
+        public TimerManager Timer { get; private set; }
 
-		public void DestroyAllObjects ()
-		{
-			foreach (GameObject obj in this.objects.Values) {
-				obj.Destroy ();
-			}
-			// redundant now, could be useful in the future
-			this.objects.Clear ();
-		    this.sortedObjects.Clear();
-		}
+        public Dictionary<string, Asset> Assets { get; private set; }
 
-		protected void GameUpdate (int startTick)
-		{
+        public Camera Camera { get; set; }
 
-            if (!this.watch.IsRunning)
-                this.watch.Start();
+        public bool ClearEveryFrame { get; set; } = true;
 
-            // should this be at the end of the function?
-            this._deltaTime = (float)this.watch.Elapsed.TotalSeconds * TimeModifier;
+        public int Height => Window.Height;
 
-            this.watch.Reset();
-            this.watch.Start();
+        public bool IsGameRunning { get; set; }
 
-            if (this.OnBeforeUpdate != null)
-				OnBeforeUpdate (this);
+        public Joystick[] Joysticks { get; private set; }
 
-            if (ClearEveryFrame)
-			    this.workingGraphics.Clear (Color.Black);
+        public Dictionary<string, GameObject> Objects { get; private set; }
 
-			foreach (GameObject obj in this.sortedObjects)
-			{
-                obj.deltaTicks = (int) ((startTick - obj.ticks) * TimeModifier);
-				obj.ticks = startTick;
-			    obj.deltaTime = _deltaTime;
-				if (!obj.enabled)
-					continue;
-				obj.Draw ();
-				if (this.debugCollisions) {
-					Pen green = new Pen (Color.Green);
-					if (obj.hitBoxes != null) {
-						foreach (GameObject.HitBox hitBox in obj.hitBoxes.Values) {
-							this.workingGraphics.DrawRectangle (
-                                green, obj.x + hitBox.x - (obj.ignoreCamera ? 0 : Camera.X), 
-                                obj.y + hitBox.y - (obj.ignoreCamera ? 0 : Camera.Y), hitBox.width, hitBox.height);
-						}
-					}
-				}
-			}
+        public SortedSet<GameObject> SortedObjects { get; private set; }
+        public float UnchangedTime { get; private set; }
+        public float Time { get; private set; }
 
-			if (this.OnAfterUpdate != null)
-				OnAfterUpdate (this);
+        // time modifier for deltaTime and deltaTicks
+        public float TimeModifier { get; set; } = 1f;
 
-            if (this.dirtyObjects.Count > 0)
+        public int Width => Window.Width;
+
+        public float DeltaTime { get; private set; }
+        public float UnchangedDeltaTime { get; private set; }
+
+        public event AfterUpdateEventHandler OnAfterUpdate;
+
+        public event BeforeUpdateEventHandler OnBeforeUpdate;
+
+
+        // put in fast2d?
+        // rewrite / use aiv-vorbis
+        //private object PlaySoundThread(string assetName, bool loop, float volume = 1f)
+        //{
+        //    var fileName = GetAsset(assetName).FileName;
+        //    var ext = fileName.Substring(fileName.LastIndexOf(@".", StringComparison.Ordinal) + 1);
+
+        //    if (ext != "ogg")
+        //        throw new NotImplementedException($"Support for audio extension '{ext}' is not implemented.");
+        //    try
+        //    {
+        //        var stream = new OggStream(fileName);
+        //        stream.IsLooped = loop;
+        //        stream.Volume = volume;
+        //        stream.Prepare();
+        //        stream.Play();
+        //        return stream;
+        //    }
+        //    catch 
+        //    {
+        //        Console.WriteLine("AUDIO PLAY ERROR.");
+        //    }
+        //    return null;
+        //}
+
+        protected void GameUpdate()
+        {
+            Window.Update();
+
+            UnchangedDeltaTime = Window.deltaTime;
+            // having a deltatime higher than 0.33 means either that the game is having only 3fps or that something is loading
+            // in both cases having a fixed maximum deltatime would make things smoother
+            if (UnchangedDeltaTime > MaxDeltaTime)
+                UnchangedDeltaTime = MaxDeltaTime;
+            DeltaTime = UnchangedDeltaTime*TimeModifier;
+            UnchangedTime += UnchangedDeltaTime;
+            Time += DeltaTime;
+
+            Timer.Update();
+
+            OnBeforeUpdate?.Invoke(this);
+
+            foreach (var obj in SortedObjects)
+            {
+                obj.UnchangedTime = UnchangedTime;
+                obj.Time = Time;
+                obj.UnchangedDeltaTime = UnchangedDeltaTime;
+                obj.DeltaTime = DeltaTime;
+                if (!obj.Enabled)
+                    continue;
+                obj.Draw();
+                if (debugCollisions && obj.HitBoxes != null)
+                {
+                    foreach (var hitBox in obj.HitBoxes.Values)
+                    {
+                        if (hitBox.Width <= 0 || hitBox.Height <= 0)
+                            continue;
+                        if (!debugCollisionsBoxes.ContainsKey(hitBox) ||
+                            hitBox.X != debugCollisionsBoxes[hitBox].X || hitBox.Y != debugCollisionsBoxes[hitBox].Y ||
+                            hitBox.Width != debugCollisionsBoxes[hitBox].Width || hitBox.Height != debugCollisionsBoxes[hitBox].Height)
+                            debugCollisionsBoxes[hitBox] = new RectangleObject(hitBox.Width, hitBox.Height)
+                            {
+                                Color = Color.Green
+                            };
+                        var rectangle = debugCollisionsBoxes[hitBox];
+                        rectangle.X = obj.DrawX + hitBox.X;
+                        rectangle.Y = obj.DrawY + hitBox.Y;
+                        rectangle.Draw();
+                    }
+                }
+            }
+
+            OnAfterUpdate?.Invoke(this);
+
+            if (dirtyObjects.Count > 0)
             {
                 var newObjects = dirtyObjects.ToArray();
                 dirtyObjects.Clear();
-                foreach (KeyValuePair<GameObject, int> pair in newObjects)
+                foreach (var pair in newObjects)
                 {
                     if (pair.Value == 1)
                     {
-                        pair.Key.ticks = this.ticks;
-                        this.sortedObjects.Add(pair.Key);
-                    } else if (pair.Value == 0)
-                        this.sortedObjects.Remove(pair.Key);
+                        pair.Key.Time = Time;
+                        SortedObjects.Add(pair.Key);
+                    }
+                    else if (pair.Value == 0)
+                        SortedObjects.Remove(pair.Key);
                     else if (pair.Value == 2) // order changed
                     {
-                        this.sortedObjects.Remove(pair.Key);
-                        this.sortedObjects.Add(pair.Key);
+                        SortedObjects.Remove(pair.Key);
+                        SortedObjects.Add(pair.Key);
                     }
                 }
             }
         }
 
-		public virtual void Run ()
-		{
 
-			this.window.Show ();
+        protected void Initialize()
+        {
+            Camera = new Camera();
 
-			isGameRunning = true;
-            
-			// compute update frequency
-			int freq = 1000 / this.fps;
-			this.startTicks = this.ticks;
+            // create dictionaries
+            Objects = new Dictionary<string, GameObject>();
+            SortedObjects = new SortedSet<GameObject>(new GameObjectComparer());
+            Assets = new Dictionary<string, Asset>();
+
+            dirtyObjects = new Dictionary<GameObject, int>();
+
+            Joysticks = new Joystick[8];
+
+            debugCollisionsBoxes = new Dictionary<GameObject.HitBox, RectangleObject>();
+
+            Timer = new TimerManager(this);
+        }
 
 
-			while (isGameRunning) {
-				
-				int startTick = this.ticks;
+        public void DestroyAllObjects()
+        {
+            foreach (var obj in Objects.Values)
+            {
+                obj.Destroy();
+            }
+            // redundant now, could be useful in the future
+            Objects.Clear();
+            SortedObjects.Clear();
+        }
 
-				Application.DoEvents ();
+        public Asset GetAsset(string name)
+        {
+            return Assets[name];
+        }
 
-				this.GameUpdate (startTick);
+        // keyboard management
+        public bool IsKeyDown(KeyCode key)
+        {
+            return Window.GetKey(key);
+        }
 
-				this.window.pbox.Image = this.workingBitmap;
-
-				int endTick = this.ticks;
-
-				// check if we need to slowdown
-				if (endTick - startTick < freq) {
-					Thread.Sleep (freq - (endTick - startTick));
-				}
-			}
-		}
-
-		/*
+        /*
 		 * 
 		 * Asset's management
 		 * 
 		 */
 
-		public void LoadAsset (string name, Asset asset)
-		{
-			asset.engine = this;
-			this.assets [name] = asset;
-		}
+        public void LoadAsset(string name, Asset asset)
+        {
+            asset.Engine = this;
+            Assets[name] = asset;
+        }
 
-		public Asset GetAsset (string name)
-		{
-			return this.assets [name];
-		}
+        //public virtual void PlaySound(string assetName, float volume = 1f, bool loop = false)
+        //{
+        //    AudioAsset audioAsset = (AudioAsset) GetAsset(assetName);
+        //    audioSource.Volume = volume; // same volume for everything? :( more audio sources? effect - soundtrack - etc.
+        //    audioSource.Play(audioAsset.Clip, loop);
+        //}
 
-		/* 
+        //public virtual void PlaySoundLoop(string assetName, float volume = 1f)
+        //{
+        //    PlaySound(assetName, volume, true);
+        //}
+
+        public void RemoveObject(GameObject obj)
+        {
+            if (debugCollisions && obj.HitBoxes != null)
+                foreach (var hitBox in obj.HitBoxes.Values)
+                    if (debugCollisionsBoxes.ContainsKey(hitBox))
+                        debugCollisionsBoxes.Remove(hitBox);
+
+            Objects.Remove(obj.Name);
+            dirtyObjects[obj] = 0;
+        }
+
+        public void Run()
+        {
+
+            IsGameRunning = true;
+
+            // compute update frequency
+            //int freq = 1000 / this.fps;
+
+            while (IsGameRunning)
+            {
+                GameUpdate();
+            }
+            // check if we need to slowdown
+            //if (endTick - startTick < freq)
+            //{
+            //    Thread.Sleep(freq - (endTick - startTick));
+            //}
+        }
+
+        public void SpawnObject(GameObject obj)
+        {
+            SpawnObject(obj.Name, obj);
+        }
+
+        /* 
 		 * 
 		 * GameObject's management
 		 * 
 		 */
 
-		public void SpawnObject (string name, GameObject obj)
-		{
-			obj.name = name;
-			obj.engine = this;
-			obj.enabled = true;
-            obj.id = totalObjCount++;
-            this.objects [name] = obj;
-		    this.dirtyObjects[obj] = 1;
-			obj.Initialize ();
-		}
-		public void SpawnObject (GameObject obj)
-		{
-			SpawnObject (obj.name, obj);
-		}
-
-		public void RemoveObject (GameObject obj)
-		{
-			this.objects.Remove (obj.name);
-		    this.dirtyObjects[obj] = 0;
+        public void SpawnObject(string name, GameObject obj)
+        {
+            obj.Name = name;
+            obj.Engine = this;
+            obj.Enabled = true;
+            obj.Id = totalObjCount++;
+            Objects[name] = obj;
+            dirtyObjects[obj] = 1;
+            obj.Initialize();
         }
 
         public void UpdatedObjectOrder(GameObject gameObject)
@@ -335,194 +303,47 @@ namespace Aiv.Engine
             dirtyObjects[gameObject] = 2;
         }
 
-        /*
-		 * 
-		 * 
-		 * Utility functions
-		 *
-		 */
+        public class Joystick
+        {
+            public bool[] buttons;
+            public long id;
+            public int index;
+            public string name;
+            public int x;
+            public int y;
 
-        public int Random (int start, int end)
-		{
-			return this.random.Next (start, end);
-		}
+            public Joystick()
+            {
+                // max 20 buttons
+                buttons = new bool[20];
+            }
 
-		public virtual object PlaySound (string assetName, float volume = 1f)
-		{
-			SoundPlayer soundPlayer = new SoundPlayer (this.GetAsset (assetName).fileName);
-			soundPlayer.Play ();
-            return soundPlayer;
-		}
+            public bool anyButton()
+            {
+                foreach (var pressed in buttons)
+                {
+                    if (pressed)
+                        return true;
+                }
+                return false;
+            }
 
-	    public virtual void FullScreen()
-	    {
-            // should also change primary display's resolution
-            window.WindowState = FormWindowState.Maximized;
-	        window.FormBorderStyle = FormBorderStyle.None;
-	    }
+            public bool AnyButton()
+            {
+                return anyButton();
+            }
 
-		public virtual object PlaySoundLoop (string assetName, float volume = 1f)
-		{
-			SoundPlayer soundPlayer = new SoundPlayer (this.GetAsset (assetName).fileName);
-			soundPlayer.PlayLooping ();
-            return soundPlayer;
+            public int GetAxis(int axisIndex)
+            {
+                if (axisIndex < 0 || axisIndex > 1)
+                    throw new ArgumentOutOfRangeException($"Wrong axis index '{axisIndex}', only 0 and 1 are supported.");
+                return axisIndex == 0 ? x : y;
+            }
+
+            public bool GetButton(int buttonIndex)
+            {
+                return buttons[buttonIndex];
+            }
         }
-
-		/*
-		 * 
-		 * Keyboard management
-		 * 
-		 */
-
-		private void KeyDown (object sender, KeyEventArgs e)
-		{
-			this.keyboardTable [e.KeyCode] = true;
-		}
-
-		private void KeyUp (object sender, KeyEventArgs e)
-		{
-			this.keyboardTable [e.KeyCode] = false;
-		}
-
-		public virtual bool IsKeyDown (int key)
-		{
-			Keys _key = (Keys) key;
-			
-			if (!keyboardTable.ContainsKey (_key)) {
-				return false;
-			}
-			return this.keyboardTable [_key];
-		}
-
-		public bool IsKeyDown (Keys key)
-		{
-			return this.IsKeyDown ((int)key);
-		}
-
-		/*
-		 * 
-		 * 
-		 * Mouse management
-		 * 
-		 */
-
-		public class Mouse
-		{
-
-			public Engine engine;
-			public bool left;
-			public bool right;
-			public bool middle;
-			public int wheel;
-
-			public Mouse (Engine engine)
-			{
-				this.engine = engine;
-				this.engine.window.pbox.MouseDown += new MouseEventHandler (this.MouseDown);
-				this.engine.window.pbox.MouseUp += new MouseEventHandler (this.MouseUp);
-				this.engine.window.MouseWheel += new MouseEventHandler (this.MouseWheel);
-			}
-
-			public int x {
-				get {
-					return Cursor.Position.X - this.engine.window.Location.X;
-				}
-			}
-
-			public int y {
-				get {
-					return Cursor.Position.Y - this.engine.window.Location.Y;
-				}
-			}
-
-			public int screenX {
-				get {
-					return Cursor.Position.X;
-				}
-			}
-
-			public int screenY {
-				get {
-					return Cursor.Position.Y;
-				}
-			}
-
-			private void MouseDown (object sender, MouseEventArgs e)
-			{
-				if (e.Button == MouseButtons.Left)
-					this.left = true;
-				if (e.Button == MouseButtons.Right)
-					this.right = true;
-				if (e.Button == MouseButtons.Middle)
-					this.middle = true;
-			}
-
-			private void MouseUp (object sender, MouseEventArgs e)
-			{
-				if (e.Button == MouseButtons.Left)
-					this.left = false;
-				if (e.Button == MouseButtons.Right)
-					this.right = false;
-				if (e.Button == MouseButtons.Middle)
-					this.middle = false;
-			}
-
-			private void MouseWheel (object sender, MouseEventArgs e)
-			{
-				wheel = e.Delta;
-			}
-
-		}
-
-
-		/*
-		 * 
-		 * 
-		 *  Joystick management (platform specific, expects initialization from Aiv.Engine.Input)
-		 * 
-		 */
-
-		public class Joystick
-		{
-			public string name;
-			public int x;
-			public int y;
-			public bool[] buttons;
-			public long id;
-			public int index;
-
-			public Joystick ()
-			{
-				// max 20 buttons
-				this.buttons = new bool[20];
-			}
-
-			public bool GetButton (int buttonIndex)
-			{
-				return buttons [buttonIndex];
-			}
-
-			public int GetAxis (int axisIndex)
-			{
-				if (axisIndex < 0 || axisIndex > 1)
-					throw new ArgumentOutOfRangeException ($"Wrong axis index '{axisIndex}', only 0 and 1 are supported.");
-				return axisIndex == 0 ? x : y;
-			}
-
-			public bool anyButton ()
-			{
-				foreach (bool pressed in this.buttons) {
-					if (pressed)
-						return true;
-				}
-				return false;
-			}
-
-			public bool AnyButton ()
-			{
-				return anyButton ();
-			}
-		}
-	}
+    }
 }
-

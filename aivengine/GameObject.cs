@@ -2,253 +2,308 @@
 
 Copyright 2015 20tab S.r.l.
 Copyright 2015 Aiv S.r.l.
+Forked by Luciano Ferraro
 
 */
 
 using System;
 using System.Collections.Generic;
+using Aiv.Vorbis;
+using OpenTK;
 
 namespace Aiv.Engine
 {
-	public class GameObject
-	{
-		public string name;
-		public int x;
-		public int y;
+    public class GameObject
+    {
+        public delegate void AfterUpdateEventHandler(object sender);
 
-        public bool ignoreCamera = false;
+        public delegate void BeforeUpdateEventHandler(object sender);
 
-		// rendering order, lower values are rendered before
-		private int _order;
-
-	    public virtual int order
-	    {
-	        get { return _order; }
-	        set
-	        {
-                if (engine != null && _order != value) // if the object has been spawned
-	                engine.UpdatedObjectOrder(this);
-                _order = value;
-            }
-	    }
-
-		public Engine engine;
-
-        public int id;
-        public int deltaTicks;
-        public int ticks;
-        public float deltaTime;
-
-        public Dictionary<string, HitBox> hitBoxes;
-
-		private bool _enabled = false;
-
-	    public virtual bool enabled {
-			get {
-				return _enabled;
-			}
-			set {
-				if (value != _enabled) {
-					// call Enable/Disable events
-					if (value) {
-						if (this.OnEnable != null)
-							OnEnable (this);
-					} else {
-						if (this.OnDisable != null)
-							OnDisable (this);
-					}
-				}
-				_enabled = value;
-			}
-		}
-
-		/*
+        /*
 		 * 
 		 * events management
 		 * 
 		 */
 
-		public delegate void DestroyEventHandler(object sender);
-		public event DestroyEventHandler OnDestroy;
+        public delegate void DestroyEventHandler(object sender);
 
-		public delegate void StartEventHandler(object sender);
-		public event StartEventHandler OnStart;
-
-        public delegate void BeforeUpdateEventHandler(object sender);
-        public event BeforeUpdateEventHandler OnBeforeUpdate;
-
-        public delegate void UpdateEventHandler(object sender);
-		public event UpdateEventHandler OnUpdate;
-
-        public delegate void AfterUpdateEventHandler(object sender);
-        public event AfterUpdateEventHandler OnAfterUpdate;
+        public delegate void DisableEventHandler(object sender);
 
         public delegate void EnableEventHandler(object sender);
-		public event EnableEventHandler OnEnable;
 
-		public delegate void DisableEventHandler(object sender);
-		public event DisableEventHandler OnDisable;
+        public delegate void StartEventHandler(object sender);
 
-        // if true then all objects before this do not need to get redrawn every frame
-        public bool BaseObject { get; set; }
-        public bool CanDraw { get; set; } = true;
+        public delegate void UpdateEventHandler(object sender);
 
-        public TimerManager Timer { get; private set; }
+        private bool enabled;
 
-        public GameObject ()
-		{
-			this.x = 0;
-			this.y = 0;
+        // rendering order, lower values are rendered before
+        private int order;
+        private AudioSource audioSource;
 
-            Timer = new TimerManager(this);
-		}
-
-		public void Destroy() {
-			// call event handlers
-			if (this.OnDestroy != null)
-				OnDestroy (this);
-		    this.enabled = false;
-			
-			if (this.engine != null) {
-				this.engine.RemoveObject (this);
-			}
-		}
-
-		public virtual void Initialize() {
-			this.Start();
-			if (this.OnStart != null)
-				this.OnStart (this);
-		}
-
-		public virtual void Draw()
+        public GameObject()
         {
-            if (this.OnBeforeUpdate != null)
-                this.OnBeforeUpdate(this);
-
-            this.Update();
-			if (this.OnUpdate != null)
-				this.OnUpdate (this);
-
-            if (this.OnAfterUpdate != null)
-                this.OnAfterUpdate(this);
+            Timer = new TimerManager(this);
         }
 
-		// this is called when the GameObject is allocated
-		public virtual void Start()
-		{
-		}
+        // if true then all objects before this do not need to get redrawn every frame
+        public virtual bool BaseObject { get; set; }
+        public virtual bool CanDraw { get; set; } = true;
 
-		// this is called by the game loop at every cycle
-		public virtual void Update()
-		{
-            Timer.Update();
+        public float DeltaTime { get; internal set; }
+
+        public float UnchangedDeltaTime { get; internal set; }
+
+        public virtual float DrawX => X - (IgnoreCamera ? 0 : Engine.Camera.X);
+
+        public virtual float DrawY => Y - (IgnoreCamera ? 0 : Engine.Camera.Y);
+
+        public virtual bool Enabled
+        {
+            get { return enabled; }
+            set
+            {
+                if (value != enabled)
+                {
+                    // call Enable/Disable events
+                    if (value)
+                    {
+                        OnEnable?.Invoke(this);
+                    }
+                    else
+                    {
+                        OnDisable?.Invoke(this);
+                    }
+                }
+                enabled = value;
+            }
+        }
+
+        public AudioSource AudioSource
+        {
+            get { return audioSource ?? (audioSource = new AudioSource()); }
+            set { audioSource = value; }
+        }
+
+        public Engine Engine { get; internal set; }
+
+        public Dictionary<string, HitBox> HitBoxes { get; private set; }
+
+        public virtual int Id { get; set; }
+
+        public virtual bool IgnoreCamera { get; set; } = false;
+
+        public virtual string Name { get; set; }
+
+        public virtual int Order
+        {
+            get { return order; }
+            set
+            {
+                if (Engine != null && order != value) // if the object has been spawned
+                    Engine.UpdatedObjectOrder(this);
+                order = value;
+            }
+        }
+
+        public float UnchangedTime { get; internal set; }
+
+        public float Time { get; internal set; }
+
+        public TimerManager Timer { get; }
+        public virtual float X { get; set; }
+        public virtual float Y { get; set; }
+
+        public virtual Vector2 Scale { get; set; } = Vector2.One;
+
+        public event AfterUpdateEventHandler OnAfterUpdate;
+        public event BeforeUpdateEventHandler OnBeforeUpdate;
+        public event DestroyEventHandler OnDestroy;
+        public event DisableEventHandler OnDisable;
+        public event EnableEventHandler OnEnable;
+        public event StartEventHandler OnStart;
+        public event UpdateEventHandler OnUpdate;
+
+        public void AddHitBox(string name, int x, int y, int width, int height)
+        {
+            if (HitBoxes == null)
+            {
+                HitBoxes = new Dictionary<string, HitBox>();
+            }
+            var hbox = new HitBox(name, x, y, width, height) {Owner = this};
+            HitBoxes[name] = hbox;
+        }
+
+        // check with all objects
+        public List<Collision> CheckCollisions()
+        {
+            if (HitBoxes == null)
+            {
+                throw new Exception("GameObject without hitboxes");
+            }
+            var collisions = new List<Collision>();
+            foreach (var obj in Engine.Objects.Values)
+            {
+                if (!obj.Enabled)
+                    continue;
+                // ignore myself
+                if (obj == this)
+                    continue;
+                if (obj.HitBoxes == null)
+                    continue;
+                foreach (var hitBox in HitBoxes.Values)
+                {
+                    foreach (var otherHitBox in obj.HitBoxes.Values)
+                    {
+                        if (hitBox.CollideWith(otherHitBox))
+                        {
+                            var collision = new Collision(hitBox.Name, obj, otherHitBox.Name);
+                            collisions.Add(collision);
+                        }
+                    }
+                }
+            }
+            return collisions;
         }
 
         // every subclass should override this
-        public virtual GameObject Clone() {
-			GameObject go = new GameObject ();
-			go.name = this.name;
-			go.x = this.x;
-			go.y = this.y;
-			return go;
-		}
+        public virtual GameObject Clone()
+        {
+            var go = new GameObject
+            {
+                Name = Name,
+                X = X,
+                Y = Y
+            };
+            return go;
+        }
 
-		public void AddHitBox(string name, int x, int y, int width, int height) {
-			if (this.hitBoxes == null) {
-				this.hitBoxes = new Dictionary<string, HitBox> ();
-			}
-			HitBox hbox = new HitBox (name, x, y, width, height);
-			hbox.owner = this;
-			this.hitBoxes [name] = hbox;
-		}
-				
-		public class HitBox {
-			public string name;
-			public int x;
-			public int y;
-			public int width;
-			public int height;
-			public GameObject owner;
+        public void Destroy()
+        {
+            // call event handlers
+            OnDestroy?.Invoke(this);
+            Enabled = false;
 
-			public HitBox(string name, int x, int y, int width, int height)
-			{
-				this.name = name;
-				this.x = x;
-				this.y = y;
-				this.width = width;
-				this.height = height;
+            audioSource?.Stop();
+            Engine?.RemoveObject(this);
+        }
 
-			}
+        public virtual void Draw()
+        {
+            OnBeforeUpdate?.Invoke(this);
 
-			public bool CollideWith(HitBox other) {
-				int x1 = this.owner.x + this.x - (this.owner.ignoreCamera ? 0 : this.owner.engine.Camera.X);
-				int y1 = this.owner.y + this.y - (this.owner.ignoreCamera ? 0 : this.owner.engine.Camera.Y);
-				int x2 = other.owner.x + other.x - (this.owner.ignoreCamera ? 0 : this.owner.engine.Camera.X);
-				int y2 = other.owner.y + other.y - (this.owner.ignoreCamera ? 0 : this.owner.engine.Camera.Y);
-				// simple rectangle collision check
-				if (x1 + this.width >= x2 &&
-				    x1 <= (x2 + other.width) &&
-				    y1 + this.height >= y2 &&
-				    y1 <= (y2 + other.height))
-					return true;
-				// no collision
-				return false;
-			}
+            Update();
+            OnUpdate?.Invoke(this);
+
+            OnAfterUpdate?.Invoke(this);
+        }
+
+        public virtual void Initialize()
+        {
+            Start();
+            OnStart?.Invoke(this);
+        }
+
+        // this is called when the GameObject is allocated
+        public virtual void Start()
+        {
+        }
+
+        // this is called by the game loop at every cycle
+        public virtual void Update()
+        {
+            Timer.Update();
+        }
+
+        public class HitBox
+        {
+            public string Name;
+            public GameObject Owner;
+            private int width;
+            private int height;
+            private float x;
+            private float y;
+
+            public int Width
+            {
+                get { return (int)(width * Owner.Scale.X); }
+                set { width = value; }
+            }
+
+            public int Height
+            {
+                get { return (int)(height * Owner.Scale.Y); }
+                set { height = value; }
+            }
+
+            public float RealHeight => Height ;
+
+            public HitBox(string name, int x, int y, int width, int height)
+            {
+                Name = name;
+                X = x;
+                Y = y;
+                this.Width = width;
+                Height = height;
+            }
+
+            public float X
+            {
+                get { return x * Owner.Scale.X; }
+                set { x = value; }
+            }
+
+            public float Y
+            {
+                get { return y * Owner.Scale.Y; }
+                set { y = value; }
+            }
 
             public HitBox Clone()
             {
-                return (HitBox)MemberwiseClone();
+                return (HitBox) MemberwiseClone();
             }
-		}
 
-		public class Collision {
-			public string hitBox;
-			public GameObject other;
-			public string otherHitBox;
+            public bool CollideWith(HitBox other)
+            {
+                var x1 = (int) (Owner.DrawX + X);
+                var y1 = (int) (Owner.DrawY + Y);
+                var x2 = (int) (other.Owner.DrawX + other.X);
+                var y2 = (int) (other.Owner.DrawY + other.Y);
+                // simple rectangle collision check
+                if (x1 + Width >= x2 &&
+                    x1 <= x2 + other.Width &&
+                    y1 + Height >= y2 &&
+                    y1 <= y2 + other.Height)
+                    return true;
+                // no collision
+                return false;
+            }
+        }
 
-			public Collision(string hitBoxName, GameObject other, string otherHitBoxName) {
-				this.hitBox = hitBoxName;
-				this.other = other;
-				this.otherHitBox = otherHitBoxName;
-			}
-		}
+        public class Collision
+        {
+            public Collision(string hitBoxName, GameObject other, string otherHitBoxName)
+            {
+                HitBox = hitBoxName;
+                Other = other;
+                OtherHitBox = otherHitBoxName;
+            }
 
-		// check with all objects
-		public List<Collision> CheckCollisions() {
-			if (this.hitBoxes == null) {
-				throw new Exception ("GameObject without hitboxes");
-			}
-			List<Collision> collisions = new List<Collision> ();
-			foreach (GameObject obj in this.engine.objects.Values) {
-				if (!obj.enabled)
-					continue;
-				// ignore myself
-				if (obj == this)
-					continue;
-				if (obj.hitBoxes == null)
-					continue;
-				foreach (HitBox hitBox in this.hitBoxes.Values) {
-					foreach (HitBox otherHitBox in obj.hitBoxes.Values) {
-						if (hitBox.CollideWith (otherHitBox)) {
-							Collision collision = new Collision (hitBox.name, obj, otherHitBox.name);
-							collisions.Add (collision);
-						}
-					}
-				}
-			}
-			return collisions;
-		}
-
+            public string HitBox { get; private set; }
+            public GameObject Other { get; private set; }
+            public string OtherHitBox { get; private set; }
+        }
     }
 
     internal class GameObjectComparer : IComparer<GameObject>
     {
         public int Compare(GameObject x, GameObject y)
         {
-            int result = y.order.CompareTo(x.order);
+            var result = y.Order.CompareTo(x.Order);
             if (result == 0)
-                result = y.id.CompareTo(x.id);
-            return -1 * result;
+                result = y.Id.CompareTo(x.Id);
+            return -1*result;
         }
     }
 }

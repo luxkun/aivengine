@@ -1,37 +1,63 @@
-﻿using System;
+﻿/*
+
+Forked by Luciano Ferraro
+
+*/
+
+using System;
 using System.Collections.Generic;
 
 namespace Aiv.Engine
 {
     public class TimerManager
     {
-        private GameObject owner;
-        private Dictionary<string, float> timers;
-        private Dictionary<string, Action<GameObject>> callBacks;
+        private readonly Dictionary<string, Tuple<Action<GameObject, object[]>, object[]>> callBacks;
 
-        public TimerManager(GameObject owner)
+        private readonly Engine engine;
+        private readonly Dictionary<string, bool> ignoreTimeModifiers;
+        private readonly GameObject owner;
+        private readonly Dictionary<string, float> timers;
+
+        private TimerManager()
+        {
+            timers = new Dictionary<string, float>();
+            ignoreTimeModifiers = new Dictionary<string, bool>();
+            callBacks = new Dictionary<string, Tuple<Action<GameObject, object[]>, object[]>>();
+        }
+
+        public TimerManager(Engine engine) : this()
+        {
+            this.engine = engine;
+        }
+
+        public TimerManager(GameObject owner) : this()
         {
             this.owner = owner;
-
-            timers = new Dictionary<string, float>();
-            callBacks = new Dictionary<string, Action<GameObject>>();
         }
 
         public float Get(string key)
         {
             float result;
             if (!timers.TryGetValue(key, out result))
-                return 0f;//float.MaxValue; // default value
+                return 0f; //float.MaxValue; // default value
             return result;
         }
 
-        public void Set(string key, float value, Action<GameObject> callback = null)
+        public void Set(
+            string key, float value, Action<GameObject, object[]> callback = null,
+            bool ignoreTimeModifier = false, object[] extraArgs = null)
         {
             timers[key] = value;
+            ignoreTimeModifiers[key] = ignoreTimeModifier;
             if (callback != null)
-                callBacks[key] = callback;
+                callBacks[key] = Tuple.Create(callback, extraArgs);
             else if (callBacks.ContainsKey(key) && callBacks[key] != null)
-                callBacks[key] = null;
+                callBacks[key] = Tuple.Create((Action<GameObject, object[]>) null, (object[]) null);
+        }
+
+        public bool Contains(string key)
+        {
+            return timers.ContainsKey(key);
         }
 
         public void Update()
@@ -40,11 +66,14 @@ namespace Aiv.Engine
             timers.Keys.CopyTo(keys, 0);
             foreach (var key in keys)
             {
-                if (timers[key] > 0f) { 
-                    timers[key] -= owner.deltaTime;
-                    if (callBacks.ContainsKey(key))
-                        callBacks[key](owner);
+                if (timers[key] > 0f)
+                {
+                    timers[key] -= ignoreTimeModifiers[key]
+                        ? (owner == null ? engine.UnchangedDeltaTime : owner.UnchangedDeltaTime)
+                        : (owner == null ? engine.UnchangedDeltaTime : owner.DeltaTime);
                 }
+                else if (callBacks.ContainsKey(key))
+                    callBacks[key].Item1(owner, callBacks[key].Item2);
             }
         }
     }
