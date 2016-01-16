@@ -4,21 +4,35 @@ Example:
 ```cs
 Engine engine = new Engine("window's title", 1024, 768, fps_int, fullscreen_bool);
 
-GameObject object = new ClassThatInheritGameObject(); engine.SpawnObject("name_of_object", object);
+GameObject object = new ClassThatInheritGameObject(); 
+engine.SpawnObject("name_of_object", object);
 
-// can do also: new SpriteAsset("filename.png") if the file doesn't have tiles SpriteAsset spriteAsset = new SpriteAsset("fileName.png", offset_x, offset_y, width, height); Engine.LoadAsset("name_of_asset", spriteAsset);
+// can do also: new SpriteAsset("filename.png") if the file doesn't have tiles SpriteAsset spriteAsset = new SpriteAsset("fileName.png", offset_x, offset_y, width, height);
+Engine.LoadAsset("name_of_asset", spriteAsset);
 
-SpriteObject sprite = new ClassThatInheritSprite(); sprite.CurrentSprite = Engine.GetAsset("name_of_asset"); engine.SpawnObject("name_of_spriteobject", sprite);
+SpriteObject sprite = new ClassThatInheritSprite(); 
+sprite.CurrentSprite = Engine.GetAsset("name_of_asset"); 
+engine.SpawnObject("name_of_spriteobject", sprite);
 
 engine.Run();
 ```
 
 Userful variables: 
 ```cs
+// ENGINE
 float Engine.DeltaTime 
+float Engine.UnchangedDeltaTime
 float Engine.Time 
 float Engine.TimeModifier //(change the real time to this modifier, if set to 0 the DeltaTime of all items won't change)
+int Engine.Width
+int Engine.Height
+Engine.IsKeyDown(KeyCode) //-> returns true if KeyCode is being pressed
+Engine.LoadAsset("asset_name", Asset) //-> adds Asset with name "asset_name" to engine's assets
+Engine.GetAsset("asset_name") //-> returns Asset with name "asset_name"
+Engine.Run() //-> runs the game
+TimerManager Engine.Timer //-> same as GameObject.Timer
 
+// GAMEOBJECT
 Engine GameObject.Engine
 float GameObject.X
 float GameObject.Y
@@ -33,4 +47,10 @@ AudioSource GameObject.AudioSource //(aiv-vorbis audiosource, can play with "Aud
 bool GameObject.Enabled //(if false the object won't be drawn) 
 GameObject.AddHitBox("nameOfHitBox", offset_x, offset_y, width, height) //-> adds an hitbox to the gameobject
 GameObject.CheckCollisions() //-> returns a List of hitsboxes that this gameobject is colliding
+TimerManager GameObject.Timer // check class
+GameObject.Destroy() //-> removes the gameobject from the engine
+
+//TIMER
+TimerManager.Set("name_of_key", float_expire_time)
+TimerManager.Get("name_of_key") -> returns true if "float_expire_time" time has passed, else returns false
 ```
