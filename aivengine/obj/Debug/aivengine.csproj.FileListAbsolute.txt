@@ -12,3 +12,4 @@ C:\Users\Lukian\Dropbox\AIV\GitProjects\aivengine-1\aivengine\bin\Debug\aiv-fast
 C:\Users\Lukian\Dropbox\AIV\GitProjects\aivengine-1\aivengine\bin\Debug\OpenTK.xml
 C:\Users\Lukian\Dropbox\AIV\GitProjects\aivengine-1\aivengine\bin\Debug\NVorbis.xml
 C:\Users\Lukian\Dropbox\AIV\GitProjects\aivengine-1\aivengine\bin\Debug\aiv-vorbis.pdb
+C:\Users\Lukian\Dropbox\AIV\GitProjects\aivengine-1\aivengine\bin\Debug\aiv-fast2d.dll
