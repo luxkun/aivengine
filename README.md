@@ -7,7 +7,8 @@ Engine engine = new Engine("window's title", 1024, 768, fps_int, fullscreen_bool
 GameObject object = new ClassThatInheritGameObject(); 
 engine.SpawnObject("name_of_object", object);
 
-// can do also: new SpriteAsset("filename.png") if the file doesn't have tiles SpriteAsset spriteAsset = new SpriteAsset("fileName.png", offset_x, offset_y, width, height);
+// can do also: new SpriteAsset("filename.png") if the file doesn't have tiles 
+SpriteAsset spriteAsset = new SpriteAsset("fileName.png", offset_x, offset_y, width, height);
 Engine.LoadAsset("name_of_asset", spriteAsset);
 
 SpriteObject sprite = new ClassThatInheritSprite(); 
