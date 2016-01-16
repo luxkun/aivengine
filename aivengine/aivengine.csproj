@@ -70,5 +70,20 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bin\Debug\aiv-fast2d.dll" />
+    <Content Include="bin\Debug\aiv-fast2d.pdb" />
+    <Content Include="bin\Debug\aiv-vorbis.dll" />
+    <Content Include="bin\Debug\aiv-vorbis.pdb" />
+    <Content Include="bin\Debug\aivengine.dll" />
+    <Content Include="bin\Debug\aivengine.pdb" />
+    <Content Include="bin\Debug\NVorbis.dll" />
+    <Content Include="bin\Debug\NVorbis.OpenTKSupport.dll" />
+    <Content Include="bin\Debug\NVorbis.OpenTKSupport.xml" />
+    <Content Include="bin\Debug\NVorbis.xml" />
+    <Content Include="bin\Debug\OpenTK.dll" />
+    <Content Include="bin\Debug\OpenTK.xml" />
   </ItemGroup>
 </Project>
