@@ -264,10 +264,13 @@ namespace Aiv.Engine
             // compute update frequency
             //int freq = 1000 / this.fps;
 
-            while (IsGameRunning)
+            while (IsGameRunning && Window.opened)
             {
                 GameUpdate();
+                if (Window.opened == false)
+                    IsGameRunning = false;
             }
+            IsGameRunning = false;
             // check if we need to slowdown
             //if (endTick - startTick < freq)
             //{
