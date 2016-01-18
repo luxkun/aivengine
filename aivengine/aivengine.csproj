@@ -31,7 +31,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="aiv-fast2d">
+    <Reference Include="aiv-fast2d, Version=1.0.5861.21332, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\aiv-fast2d\aiv-fast2d\bin\Debug\aiv-fast2d.dll</HintPath>
     </Reference>
     <Reference Include="aiv-vorbis, Version=1.0.5858.19585, Culture=neutral, processorArchitecture=MSIL">
@@ -62,7 +63,6 @@
     <Compile Include="SpriteAsset.cs" />
     <Compile Include="TextObject.cs" />
     <Compile Include="RectangleObject.cs" />
-    <Compile Include="LineObject.cs" />
     <Compile Include="ParticleSystem.cs" />
     <Compile Include="TimerManager.cs" />
     <Compile Include="Utils.cs" />
