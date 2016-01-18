@@ -64,6 +64,16 @@ namespace Aiv.Engine
 
         public Joystick[] Joysticks { get; private set; }
 
+        public int MouseX => Window.mouseX;
+
+        public int MouseY => Window.mouseY;
+
+        public bool MouseLeft => Window.mouseLeft;
+
+        public bool MouseRight => Window.mouseRight;
+
+        public bool MouseMiddle => Window.mouseMiddle;
+
         public Dictionary<string, GameObject> Objects { get; private set; }
 
         public SortedSet<GameObject> SortedObjects { get; private set; }
