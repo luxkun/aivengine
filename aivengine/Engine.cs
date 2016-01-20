@@ -173,17 +173,19 @@ namespace Aiv.Engine
                 dirtyObjects.Clear();
                 foreach (var pair in newObjects)
                 {
-                    if (pair.Value == 1)
+                    switch (pair.Value)
                     {
-                        pair.Key.Time = Time;
-                        SortedObjects.Add(pair.Key);
-                    }
-                    else if (pair.Value == 0)
-                        SortedObjects.Remove(pair.Key);
-                    else if (pair.Value == 2) // order changed
-                    {
-                        SortedObjects.Remove(pair.Key);
-                        SortedObjects.Add(pair.Key);
+                        case 1:
+                            pair.Key.Time = Time;
+                            SortedObjects.Add(pair.Key);
+                            break;
+                        case 0:
+                            SortedObjects.Remove(pair.Key);
+                            break;
+                        case 2:
+                            SortedObjects.Remove(pair.Key);
+                            SortedObjects.Add(pair.Key);
+                            break;
                     }
                 }
             }
@@ -277,7 +279,7 @@ namespace Aiv.Engine
             while (IsGameRunning && Window.opened)
             {
                 GameUpdate();
-                if (Window.opened == false)
+                if (!Window.opened)
                     IsGameRunning = false;
             }
             IsGameRunning = false;

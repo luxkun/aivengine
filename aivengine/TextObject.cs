@@ -46,7 +46,7 @@ namespace Aiv.Engine
                 FontBaseColor = fontBaseColor,
                 Alpha = (int) (alpha*255),
                 SpaceWidth = spaceWidth,
-                SpaceHeight = spaceHeight,
+                SpaceHeight = spaceHeight
             };
             if (padding != float.MinValue)
                 textRaw.Padding = padding;

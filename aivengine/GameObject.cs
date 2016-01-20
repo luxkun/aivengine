@@ -243,7 +243,7 @@ namespace Aiv.Engine
                 Name = name;
                 X = x;
                 Y = y;
-                this.Width = width;
+                Width = width;
                 Height = height;
             }
 

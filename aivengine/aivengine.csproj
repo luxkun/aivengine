@@ -58,6 +58,7 @@
     <Compile Include="Engine.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="Asset.cs" />
+    <None Include="SpriteAsset - Copy.cs" />
     <Compile Include="SpriteObject.cs" />
     <Compile Include="SpriteAsset.cs" />
     <Compile Include="TextObject.cs" />

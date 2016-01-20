@@ -19,27 +19,27 @@ namespace Aiv.Engine
         public SpriteAsset(string fileName) : base(fileName)
         {
             Texture = GetTexture(FileName);
-            Sprite = new Sprite(Texture.Width, Texture.Height);
+            Width = Texture.Width;
+            Height = Texture.Height;
         }
 
         public SpriteAsset(string fileName, int x, int y, int width, int height) : base(fileName)
         {
             Texture = GetTexture(FileName);
-            Sprite = new Sprite(width, height);
             X = x;
             Y = y;
+            Width = width;
+            Height = height;
         }
 
-        public Texture Texture { get; set; }
-
-        public Sprite Sprite { get; set; }
+        public Texture Texture { get; }
 
         public int X { get; }
         public int Y { get; }
 
-        public int Width => Sprite.Width;
+        public int Width { get; }
 
-        public int Height => Sprite.Height;
+        public int Height { get; }
 
         private static Texture GetTexture(string fileName)
         {
@@ -48,17 +48,6 @@ namespace Aiv.Engine
             if (!textures.ContainsKey(fileName))
                 textures[fileName] = new Texture(fileName);
             return textures[fileName];
-        }
-
-        internal void Draw()
-        {
-            Sprite.DrawTexture(Texture, X, Y, Width, Height);
-        }
-
-        ~SpriteAsset()
-        {
-            if (Engine != null && Engine.IsGameRunning)
-                Sprite.Dispose();
         }
 
         public SpriteAsset Clone()
