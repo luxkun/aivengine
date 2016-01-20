@@ -62,5 +62,11 @@ SpriteAsset CurrentSprite //-> the current drawn SpriteAsset
 string CurrentAnimation //-> if using animations this should be changed to the wanted animation key
 float Width/Height // Width and Height, if the sprite is scaled the width and height are also scaled
 float BaseWidth/BaseHeight // returns the unscaled width and height, userful only if the sprite is scaled
+float Opacity // set to change opacity  modifier on all alpha channels of the sprite's textures, heavy
+bool RepeatX // set repeatX on all textures
+bool RepeatY // set repeatY on all textures
+float Rotation
+float EulerRotation
+AddAnimation("animation_key", List<string> AssetsKeys, int fps)
 
 ```
