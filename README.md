@@ -35,7 +35,7 @@ obj.CurrentSprite = sprite;
 obj.OnUpdate += sender =>
 {
     var s = (SpriteObject) sender;
-    // this should go in Update method
+    // this is what should go in Update method if you override it
     s.SpriteOffset += Vector2.One;
 };
 
