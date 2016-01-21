@@ -47,8 +47,14 @@ namespace Aiv.Engine
             return textures[key];
         }
 
+        // x, y, width, height, minalpha, minpixelcount
+        private Tuple<int, int, int, int, int, int> lastHitBoxCalculationInfo;
+        private Tuple<Vector2, Vector2> cachedHitBoxInfo;
         public Tuple<Vector2, Vector2> CalculateRealHitBox(int minAlpha = 25, int minPixelCount = 5)
         {
+            var key = Tuple.Create(X, Y, Width, Height, minAlpha, minPixelCount);
+            if (lastHitBoxCalculationInfo != null && lastHitBoxCalculationInfo.Equals(key))
+                return cachedHitBoxInfo;
             // minPixelCount: if less than n pixels in a row/col then the row/col is considered empty
             var offSetDone = false;
             // CALCULATE Y
@@ -111,8 +117,10 @@ namespace Aiv.Engine
 
             //size = new Vector2(size.X - offset.X, size.Y - offset.Y);
             //offset = new Vector2(offset.X - X, offset.Y - Y);
+            lastHitBoxCalculationInfo = key;
+            cachedHitBoxInfo = Tuple.Create(offset, size);
 
-            return Tuple.Create(offset, size);
+            return cachedHitBoxInfo;
         }
 
         public SpriteAsset Clone()

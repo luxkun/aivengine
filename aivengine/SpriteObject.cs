@@ -63,10 +63,16 @@ namespace Aiv.Engine
         public float BaseWidth => Sprite.Width;
         public float BaseHeight => Sprite.Height;
 
-        public SpriteObject(int width, int height)
+        public bool AutomaticHitBox { get; }
+
+        public SpriteObject(int width, int height, bool automaticHitBox = false)
         {
             Sprite = new Sprite(width, height);
+            AutomaticHitBox = automaticHitBox;
+            if (automaticHitBox)
+                AddHitBox("auto", 0, 0, 1, 1);
         }
+
 
         private void Animate(string animationName)
         {
@@ -113,6 +119,21 @@ namespace Aiv.Engine
                 sprite.Texture,
                 (int) (sprite.X + SpriteOffset.X), (int) (sprite.Y + SpriteOffset.Y), 
                 sprite.Width, sprite.Height);
+            UpdateAutomaticHitBox(sprite);
+        }
+
+        public virtual void UpdateAutomaticHitBox(SpriteAsset sprite)
+        {
+            if (AutomaticHitBox)
+            {
+                if (HitBoxes == null || !HitBoxes.ContainsKey("auto"))
+                    AddHitBox("auto", 0, 0, 1, 1);
+                var hitBoxInfo = sprite.CalculateRealHitBox();
+                HitBoxes["auto"].X = hitBoxInfo.Item1.X;
+                HitBoxes["auto"].Y = hitBoxInfo.Item1.Y;
+                HitBoxes["auto"].Width = (int)hitBoxInfo.Item2.X;
+                HitBoxes["auto"].Height = (int)hitBoxInfo.Item2.Y;
+            }
         }
 
         public override void Draw()
