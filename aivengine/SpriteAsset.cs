@@ -47,22 +47,28 @@ namespace Aiv.Engine
             return textures[key];
         }
 
-        public Tuple<Vector2, Vector2> CalculateRealHitBox()
+        public Tuple<Vector2, Vector2> CalculateRealHitBox(int minAlpha = 25, int minPixelCount = 5)
         {
+            // minPixelCount: if less than n pixels in a row/col then the row/col is considered empty
             var offSetDone = false;
             // CALCULATE Y
             Vector2 offset = Vector2.Zero;
-            Vector2 size = Vector2.Zero;
+            Vector2 size = new Vector2(Width, Height);
             for (var posY = 0; posY < Height; posY++)
             {
                 var emptyRow = true;
+                var pixelCount = 0;
                 for (var posX = 0; posX < Width; posX++)
                 {
-                    if (Texture.Bitmap[(posY + Y) * Width * 4 + (posX + X) * 4 + 3] != 0)
+                    if (Texture.Bitmap[(posY + Y) * Texture.Width * 4 + (posX + X) * 4 + 3] > minAlpha)
                     {
-                        emptyRow = false;
-                        break;
+                        pixelCount++;
+                        if (pixelCount >= minPixelCount) { 
+                            emptyRow = false;
+                            break;
+                        }
                     }
+
                 }
                 if (emptyRow && !offSetDone)
                 {
@@ -79,12 +85,17 @@ namespace Aiv.Engine
             for (var posX = 0; posX < Width; posX++)
             {
                 var emptyCol = true;
+                var pixelCount = 0;
                 for (var posY = 0; posY < Height; posY++)
                 {
-                    if (Texture.Bitmap[(posY + Y) * Width * 4 + (posX + X) * 4 + 3] != 0)
+                    if (Texture.Bitmap[(posY + Y) * Texture.Width * 4 + (posX + X) * 4 + 3] > minAlpha)
                     {
-                        emptyCol = false;
-                        break;
+                        pixelCount++;
+                        if (pixelCount >= minPixelCount)
+                        {
+                            emptyCol = false;
+                            break;
+                        }
                     }
                 }
                 if (emptyCol && !offSetDone)
