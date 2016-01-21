@@ -58,7 +58,7 @@ namespace Aiv.Engine
                 var emptyRow = true;
                 for (var posX = 0; posX < Width; posX++)
                 {
-                    if (Texture.Bitmap[posY * Width * 4 + posX * 4] != 0)
+                    if (Texture.Bitmap[(posY + Y) * Width * 4 + (posX + X) * 4 + 3] != 0)
                     {
                         emptyRow = false;
                         break;
@@ -71,7 +71,7 @@ namespace Aiv.Engine
                 else if (!emptyRow)
                 {
                     offSetDone = true;
-                    size = new Vector2(size.X, posY - offset.Y);
+                    size = new Vector2(size.X, posY);
                 }
             }
             // CALCULATE X
@@ -81,7 +81,7 @@ namespace Aiv.Engine
                 var emptyCol = true;
                 for (var posY = 0; posY < Height; posY++)
                 {
-                    if (Texture.Bitmap[posY * Width * 4 + posX * 4] != 0)
+                    if (Texture.Bitmap[(posY + Y) * Width * 4 + (posX + X) * 4 + 3] != 0)
                     {
                         emptyCol = false;
                         break;
@@ -94,9 +94,12 @@ namespace Aiv.Engine
                 else if (!emptyCol)
                 {
                     offSetDone = true;
-                    size = new Vector2(posX - offset.X, size.Y);
+                    size = new Vector2(posX, size.Y);
                 }
             }
+
+            //size = new Vector2(size.X - offset.X, size.Y - offset.Y);
+            //offset = new Vector2(offset.X - X, offset.Y - Y);
 
             return Tuple.Create(offset, size);
         }
