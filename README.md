@@ -18,6 +18,31 @@ engine.SpawnObject("name_of_spriteobject", sprite);
 engine.Run();
 ```
 
+Working example with repeating sprite:
+```cs
+Engine engine = new Engine("test", 1024, 768, 60, false);
+
+// set default directory for assets, will be appened to all assets's path
+Asset.BasePath = "..\\..\\Assets";
+var sprite = new SpriteAsset("goblins.png", repeatx: true, repeaty: true);
+var obj = new SpriteObject(sprite.Width, sprite.Height);
+obj.CurrentSprite = sprite;
+
+obj.OnUpdate += sender =>
+{
+    var s = (SpriteObject) sender;
+    // this should go in Update method
+    s.SpriteOffset += Vector2.One;
+};
+
+engine.SpawnObject("obj", obj);
+
+engine.Run();
+```
+
+Check out Futuridium for example project:
+https://github.com/luxkun/Futuridium
+
 Userful variables: 
 ```cs
 // ENGINE
@@ -43,7 +68,7 @@ float GameObject.DeltaTime
 float GameObject.Time //(total time since the gameobject has been spawned) 
 float GameObject.UnchangedTime //(userful when the Engine.TimeModifier is changed, ex.: pause) 
 float GameObject.IgnoreCamera //(ignores camera position, userful for hud etc.) 
-int GameObject.order //(order of the gameobject in the draw, if object A has lower order than object B then object B is going to be drawn after object A) 
+int GameObject.Order //(order of the gameobject in the draw, if object A has lower order than object B then object B is going to be drawn after object A) 
 AudioSource GameObject.AudioSource //(aiv-vorbis audiosource, can play with "AudioSource.Play(AudioClip);") 
 bool GameObject.Enabled //(if false the object won't be drawn) 
 GameObject.AddHitBox("nameOfHitBox", offset_x, offset_y, width, height) //-> adds an hitbox to the gameobject
@@ -52,6 +77,12 @@ TimerManager GameObject.Timer // check class
 GameObject.Destroy() //-> removes the gameobject from the engine
 //Methods to override:
 // - Update
+// - Start
+//If you want to handle Destroy you can do this:
+OnDestroy += DestroyEvent;
+public void DestroyEvent(object sender) {
+    // do stuff
+}
 
 //TIMER
 TimerManager.Set("name_of_key", float_expire_time)
