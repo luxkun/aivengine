@@ -93,6 +93,10 @@ TimerManager.Set("name_of_key", float_expire_time)
 TimerManager.Get("name_of_key") -> returns true if "float_expire_time" time has passed, else returns false
 
 // SPRITEOBJECT -> INHERIT GAMEOBJECT
+SpriteObject(int width, int height, bool automaticHitBox)
+bool AutomaticHitBox
+// if automatichitbox is true then an hitbox "auto" is added to the sprite, which is automatically updated every time the sprite
+//  is changed, works even with animations
 SpriteAsset CurrentSprite //-> the current drawn SpriteAsset
 string CurrentAnimation //-> if using animations this should be changed to the wanted animation key
 float Width/Height // Width and Height, if the sprite is scaled the width and height are also scaled
