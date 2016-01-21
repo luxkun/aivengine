@@ -28,6 +28,10 @@ var sprite = new SpriteAsset("goblins.png", repeatx: true, repeaty: true);
 var obj = new SpriteObject(sprite.Width, sprite.Height);
 obj.CurrentSprite = sprite;
 
+// this example uses OnUpdate instead of overriding Update method
+// C# events: https://msdn.microsoft.com/en-us/library/awbftdfh.aspx
+// if you want to use events there are other eventhandlers you can use, such as:
+// OnDestroy, OnUpdate, OnStart, OnAfterUpdate, OnBeforeUpdate, OnDisable, OnEnable
 obj.OnUpdate += sender =>
 {
     var s = (SpriteObject) sender;
