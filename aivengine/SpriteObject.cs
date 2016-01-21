@@ -43,9 +43,6 @@ namespace Aiv.Engine
             set { Sprite.EulerRotation = value; }
         }
 
-        public bool RepeatX { get; set; }
-        public bool RepeatY { get; set; }
-
         public float Opacity { get; set; } = 1f;
 
         public float Width => Sprite.Width * Scale.X;
@@ -62,6 +59,7 @@ namespace Aiv.Engine
             }
         }
 
+        public Vector2 SpriteOffset { get; set; }
         public float BaseWidth => Sprite.Width;
         public float BaseHeight => Sprite.Height;
 
@@ -110,10 +108,11 @@ namespace Aiv.Engine
         {
             Sprite.position.X = DrawX;
             Sprite.position.Y = DrawY;
-            sprite.Texture.SetRepeatX(RepeatX);
-            sprite.Texture.SetRepeatY(RepeatY);
             sprite.Texture.SetOpacity(Opacity);
-            Sprite.DrawTexture(sprite.Texture, sprite.X, sprite.Y, sprite.Width, sprite.Height);
+            Sprite.DrawTexture(
+                sprite.Texture,
+                (int) (sprite.X + SpriteOffset.X), (int) (sprite.Y + SpriteOffset.Y), 
+                sprite.Width, sprite.Height);
         }
 
         public override void Draw()

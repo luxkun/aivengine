@@ -23,11 +23,14 @@ namespace Aiv.Engine
             Vector2 scale, Color color, string fontFile = "font.png",
             Dictionary<char, Tuple<Vector2, Vector2>> charToSprite = null, float alpha = 1f, 
             Color fontBaseColor = default(Color), float spaceWidth = 44f, float spaceHeight = 31f,
-            float padding = float.MinValue, Func<float, float> paddingFunc = null)
+            float padding = float.MinValue, Func<float, float> paddingFunc = null, 
+            bool staticColor = true)
         {
             // default for ff-fonts.. this should be the font file sprite's color
             //  which will be changed if you choose a color, do not use if you have  a font with multiple
             //  colors, shadows and such.
+            if (fontBaseColor == default(Color))
+                fontBaseColor = Color.Black;
             //if (fontBaseColor == default(Color))
             //    fontBaseColor = Color.FromArgb(238, 242, 238);
             // if the textobject has been initialized without a padding and a paddingFunc use default one
@@ -44,6 +47,7 @@ namespace Aiv.Engine
             textRaw = new Fast2D.TextObject
             {
                 FontBaseColor = fontBaseColor,
+                StaticColor = staticColor, 
                 Alpha = (int) (alpha*255),
                 SpaceWidth = spaceWidth,
                 SpaceHeight = spaceHeight

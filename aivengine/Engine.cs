@@ -42,7 +42,7 @@ namespace Aiv.Engine
         {
         }
 
-        public Engine(string windowName, int width, int height, int fps, bool fullscreen)
+        public Engine(string windowName, int width, int height, int fps = 60, bool fullscreen = false)
         {
             Initialize();
 
@@ -91,32 +91,6 @@ namespace Aiv.Engine
         public event AfterUpdateEventHandler OnAfterUpdate;
 
         public event BeforeUpdateEventHandler OnBeforeUpdate;
-
-
-        // put in fast2d?
-        // rewrite / use aiv-vorbis
-        //private object PlaySoundThread(string assetName, bool loop, float volume = 1f)
-        //{
-        //    var fileName = GetAsset(assetName).FileName;
-        //    var ext = fileName.Substring(fileName.LastIndexOf(@".", StringComparison.Ordinal) + 1);
-
-        //    if (ext != "ogg")
-        //        throw new NotImplementedException($"Support for audio extension '{ext}' is not implemented.");
-        //    try
-        //    {
-        //        var stream = new OggStream(fileName);
-        //        stream.IsLooped = loop;
-        //        stream.Volume = volume;
-        //        stream.Prepare();
-        //        stream.Play();
-        //        return stream;
-        //    }
-        //    catch 
-        //    {
-        //        Console.WriteLine("AUDIO PLAY ERROR.");
-        //    }
-        //    return null;
-        //}
 
         protected void GameUpdate()
         {
