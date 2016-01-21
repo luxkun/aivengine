@@ -104,4 +104,16 @@ float Rotation
 float EulerRotation
 AddAnimation("animation_key", List<string> AssetsKeys, int fps)
 
+// SPRITEASSET -> INHERIT ASSET
+X // the x offset in the texture, basically the x you put in DrawTexture in aiv-fast2d
+Y // the y offset in the texture, basically the y you put in DrawTexture in aiv-fast2d
+Width // the width of the sprite
+Height // ...
+// if you want to use fast2d's feature repeatx/y just put repeatx: true, repeaty: true when initializating the spriteasset
+CalculateRealHitBox() //-> returns two Vector2, one have the real offsets, ignoring trasparency in the sprite, the other one have sizes
+// Example of usage: 
+/*
+var tuple = spriteasset.CalculateRealHitBox()
+AddHitBox("mass", tuple.Item1.X, tuple.Item1.Y, tuple.Item2.X, tuple.Item2.Y)
+*/
 ```
