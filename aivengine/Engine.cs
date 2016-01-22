@@ -168,6 +168,9 @@ namespace Aiv.Engine
 
         protected void Initialize()
         {
+            // crappy
+            new AudioSource();
+
             Camera = new Camera();
 
             // create dictionaries

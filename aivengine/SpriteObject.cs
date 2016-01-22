@@ -31,6 +31,12 @@ namespace Aiv.Engine
             }
         }
 
+        public Vector2 Pivot
+        {
+            get { return Sprite.pivot; }
+            set { Sprite.pivot = value; }
+        }
+
         public float Rotation
         {
             get { return Sprite.Rotation; }
@@ -150,6 +156,12 @@ namespace Aiv.Engine
             {
                 DrawSprite(CurrentSprite);
             }
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            Sprite.Dispose();
         }
 
         // optional engine param to add animations before spawning the SpriteObject

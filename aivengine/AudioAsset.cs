@@ -14,7 +14,6 @@ namespace Aiv.Engine
 {
     public class AudioAsset : Asset
     {
-        // whole file
         public AudioAsset(string fileName, bool stream = false) : base(fileName)
         {
             if (!stream)

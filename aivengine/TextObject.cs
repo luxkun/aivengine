@@ -38,10 +38,7 @@ namespace Aiv.Engine
                 paddingFunc = (float width) =>
                 {
                     float result = width;
-                    if (width > 15f && width < 44f)
-                        result *= -0.25f;
-                    else if (width < 15f)
-                        result *= -0.1f;
+                    result *= -0.066f;
                     return result;
                 };
             textRaw = new Fast2D.TextObject
