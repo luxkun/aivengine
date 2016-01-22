@@ -16,12 +16,7 @@ namespace Aiv.Engine
             if (fontBaseColor == default(Color))
                 fontBaseColor = Color.Black;
             if (paddingFunc == null && padding == float.MinValue)
-                paddingFunc = (float width) =>
-                {
-                    float result = width;
-                    result *= -0.066f;
-                    return result;
-                };
+                padding = 0;
             FontAsset = fontAsset;
             CharToSprite = charToSprite;
             FontBaseColor = fontBaseColor;
