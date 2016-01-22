@@ -85,17 +85,17 @@ namespace Aiv.Engine
             var animation = Animations[animationName];
             var neededTime = 1f/animation.Fps;
 
-            if (Time - animation.LastTick >= neededTime)
+            if (Time - animation.LastTick >= neededTime && !animation.Locked)
             {
                 animation.LastTick = Time;
-                animation.currentFrame++;
+                animation.CurrentFrame++;
                 // end of the animation ?
                 var lastFrame = animation.Sprites.Count - 1;
-                if (animation.currentFrame > lastFrame)
+                if (animation.CurrentFrame > lastFrame)
                 {
                     if (animation.Loop)
                     {
-                        animation.currentFrame = 0;
+                        animation.CurrentFrame = 0;
                     }
                     else if (animation.OneShot)
                     {
@@ -106,12 +106,12 @@ namespace Aiv.Engine
                     else
                     {
                         // block to the last frame
-                        animation.currentFrame = lastFrame;
+                        animation.CurrentFrame = lastFrame;
                     }
                 }
             }
             // simply draw the current frame
-            var spriteAssetToDraw = animation.Sprites[animation.currentFrame];
+            var spriteAssetToDraw = animation.Sprites[animation.CurrentFrame];
 
             DrawSprite(spriteAssetToDraw);
         }
@@ -181,7 +181,7 @@ namespace Aiv.Engine
             {
                 animation.Sprites.Add((SpriteAsset) engine.GetAsset(asset));
             }
-            animation.currentFrame = 0;
+            animation.CurrentFrame = 0;
             // force the first frame to be drawn
             animation.LastTick = 0;
             animation.Loop = true;
@@ -213,13 +213,14 @@ namespace Aiv.Engine
 
         public class Animation
         {
-            public int currentFrame;
+            public int CurrentFrame { get; set; }
             public SpriteObject owner;
             public float Fps { get; set; }
             public List<SpriteAsset> Sprites { get; internal set; }
             public float LastTick { get; internal set; }
             public bool Loop { get; set; }
             public bool OneShot { get; set; }
+            public bool Locked { get; set; }
 
             public Animation Clone()
             {
