@@ -83,7 +83,7 @@ namespace Aiv.Engine
                 else if (!emptyRow)
                 {
                     offSetDone = true;
-                    size = new Vector2(size.X, posY);
+                    size = new Vector2(size.X, posY + 1);
                 }
             }
             // CALCULATE X
@@ -111,7 +111,7 @@ namespace Aiv.Engine
                 else if (!emptyCol)
                 {
                     offSetDone = true;
-                    size = new Vector2(posX, size.Y);
+                    size = new Vector2(posX + 1, size.Y);
                 }
             }
 
