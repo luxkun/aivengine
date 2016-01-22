@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using Aiv.Fast2D;
 using OpenTK;
 
 namespace Aiv.Engine
@@ -18,6 +19,7 @@ namespace Aiv.Engine
             if (paddingFunc == null && padding == float.MinValue)
                 padding = 0;
             FontAsset = fontAsset;
+            FontTexture = new Texture(fontAsset.FileName);
             CharToSprite = charToSprite;
             FontBaseColor = fontBaseColor;
             SpaceWidth = spaceWidth;
@@ -47,5 +49,7 @@ namespace Aiv.Engine
         public Dictionary<char, Tuple<Vector2, Vector2>> CharToSprite { get; set; }
 
         public Asset FontAsset { get; set; }
+
+        public Texture FontTexture { get; set; }
     }
 }

@@ -26,6 +26,7 @@ namespace Aiv.Engine
                 textConfig = TextConfig.Default;
             textRaw = new Fast2D.TextObject
             {
+                FontTexture = textConfig.FontTexture.Clone(),
                 FontBaseColor = textConfig.FontBaseColor,
                 StaticColor = textConfig.StaticColor, 
                 Alpha = (int) (alpha*255),
@@ -42,7 +43,6 @@ namespace Aiv.Engine
             //    color = Color.FromArgb(238, 242, 238);
 
             textRaw.CharToSprite = textConfig.CharToSprite;
-            textRaw.FontFile = textConfig.FontAsset.FileName;
             Scale = scale;
             Color = color;
 
