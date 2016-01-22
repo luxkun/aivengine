@@ -60,6 +60,7 @@
     <Compile Include="Asset.cs" />
     <Compile Include="SpriteObject.cs" />
     <Compile Include="SpriteAsset.cs" />
+    <Compile Include="TextConfig.cs" />
     <Compile Include="TextObject.cs" />
     <Compile Include="RectangleObject.cs" />
     <Compile Include="ParticleSystem.cs" />
