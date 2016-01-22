@@ -1,5 +1,11 @@
 Simple engine that uses aiv-fast2d.
 
+Check out Example project (uses TextObject and repeating sprite):
+https://github.com/luxkun/aivengine-1/blob/master/Example/Program.cs
+
+Check out Futuridium for example project:
+https://github.com/luxkun/Futuridium
+
 Example: 
 ```cs
 Engine engine = new Engine("window's title", 1024, 768, fps_int, fullscreen_bool);
@@ -17,35 +23,6 @@ engine.SpawnObject("name_of_spriteobject", sprite);
 
 engine.Run();
 ```
-
-Working example with repeating sprite:
-```cs
-Engine engine = new Engine("test", 1024, 768, 60, false);
-
-// set default directory for assets, will be appened to all assets's path
-Asset.BasePath = "..\\..\\Assets";
-var sprite = new SpriteAsset("goblins.png", repeatx: true, repeaty: true);
-var obj = new SpriteObject(sprite.Width, sprite.Height);
-obj.CurrentSprite = sprite;
-
-// this example uses OnUpdate instead of overriding Update method
-// C# events: https://msdn.microsoft.com/en-us/library/awbftdfh.aspx
-// if you want to use events there are other eventhandlers you can use, such as:
-// OnDestroy, OnUpdate, OnStart, OnAfterUpdate, OnBeforeUpdate, OnDisable, OnEnable
-obj.OnUpdate += sender =>
-{
-    var s = (SpriteObject) sender;
-    // this is what should go in Update method if you override it
-    s.SpriteOffset += Vector2.One;
-};
-
-engine.SpawnObject("obj", obj);
-
-engine.Run();
-```
-
-Check out Futuridium for example project:
-https://github.com/luxkun/Futuridium
 
 Userful variables: 
 ```cs
