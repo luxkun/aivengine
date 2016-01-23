@@ -75,8 +75,6 @@ namespace Aiv.Engine
         {
             Sprite = new Sprite(width, height);
             AutomaticHitBox = automaticHitBox;
-            if (automaticHitBox)
-                AddHitBox("auto", 0, 0, 1, 1);
         }
 
 
@@ -132,13 +130,17 @@ namespace Aiv.Engine
         {
             if (AutomaticHitBox)
             {
-                if (HitBoxes == null || !HitBoxes.ContainsKey("auto"))
+                if (HitBoxes == null || !HitBoxes.ContainsKey("auto")) { 
                     AddHitBox("auto", 0, 0, 1, 1);
+                    HitBoxes["auto"].UseScaling = false;
+                }
                 var hitBoxInfo = sprite.CalculateRealHitBox();
-                HitBoxes["auto"].X = hitBoxInfo.Item1.X;
-                HitBoxes["auto"].Y = hitBoxInfo.Item1.Y;
-                HitBoxes["auto"].Width = (int)hitBoxInfo.Item2.X;
-                HitBoxes["auto"].Height = (int)hitBoxInfo.Item2.Y;
+                var deltaW = (float)Sprite.Width/sprite.Width;
+                var deltaH = (float)Sprite.Height/sprite.Height;
+                HitBoxes["auto"].X = hitBoxInfo.Item1.X * deltaW * Scale.X;
+                HitBoxes["auto"].Y = hitBoxInfo.Item1.Y * deltaW * Scale.Y;
+                HitBoxes["auto"].Width = (int)(hitBoxInfo.Item2.X * deltaW * Scale.X);
+                HitBoxes["auto"].Height = (int)(hitBoxInfo.Item2.Y * deltaH * Scale.Y);
             }
         }
 
