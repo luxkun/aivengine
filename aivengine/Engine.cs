@@ -26,7 +26,7 @@ namespace Aiv.Engine
         public const float MaxDeltaTime = 0.33f;
         
         public bool debugCollisions;
-        private Dictionary<GameObject.HitBox, RectangleObject> debugCollisionsBoxes;
+        private Dictionary<GameObject.HitBox, Tuple<RectangleObject, Tuple<float, float, int, int>>> debugCollisionsBoxes;
 
         // objects that need to be added (1) or removed (0) from sortedObjects
         // objects that have changed order (2)
@@ -125,14 +125,18 @@ namespace Aiv.Engine
                     {
                         if (hitBox.Width <= 0 || hitBox.Height <= 0)
                             continue;
+                        var key = Tuple.Create(hitBox.X, hitBox.Y, hitBox.Width, hitBox.Height);
                         if (!debugCollisionsBoxes.ContainsKey(hitBox) ||
-                            hitBox.X != debugCollisionsBoxes[hitBox].X || hitBox.Y != debugCollisionsBoxes[hitBox].Y ||
-                            hitBox.Width != debugCollisionsBoxes[hitBox].Width || hitBox.Height != debugCollisionsBoxes[hitBox].Height)
-                            debugCollisionsBoxes[hitBox] = new RectangleObject(hitBox.Width, hitBox.Height)
+                            !debugCollisionsBoxes[hitBox].Item2.Equals(key)
+                            //hitBox.X != debugCollisionsBoxes[hitBox].X || hitBox.Y != debugCollisionsBoxes[hitBox].Y ||
+                            //hitBox.Width != debugCollisionsBoxes[hitBox].Width ||
+                            //hitBox.Height != debugCollisionsBoxes[hitBox].Height
+                            )
+                            debugCollisionsBoxes[hitBox] = Tuple.Create(new RectangleObject(hitBox.Width, hitBox.Height)
                             {
                                 Color = Color.Green
-                            };
-                        var rectangle = debugCollisionsBoxes[hitBox];
+                            }, key);
+                        var rectangle = debugCollisionsBoxes[hitBox].Item1;
                         rectangle.X = obj.DrawX + hitBox.X;
                         rectangle.Y = obj.DrawY + hitBox.Y;
                         rectangle.Draw();
@@ -183,7 +187,7 @@ namespace Aiv.Engine
 
             Joysticks = new Joystick[8];
 
-            debugCollisionsBoxes = new Dictionary<GameObject.HitBox, RectangleObject>();
+            debugCollisionsBoxes = new Dictionary<GameObject.HitBox, Tuple<RectangleObject, Tuple<float, float, int, int>>>();
 
             Timer = new TimerManager(this);
         }
@@ -202,7 +206,7 @@ namespace Aiv.Engine
 
         public Asset GetAsset(string name)
         {
-            return Assets[name];
+            return Assets[name].Clone();
         }
 
         // keyboard management

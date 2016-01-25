@@ -118,14 +118,16 @@ namespace Aiv.Engine
 
         private void DrawSprite(SpriteAsset sprite)
         {
-            Sprite.position.X = DrawX;
-            Sprite.position.Y = DrawY;
-            sprite.Texture.SetOpacity(Opacity);
-            Sprite.DrawTexture(
-                sprite.Texture,
-                (int) (sprite.X + SpriteOffset.X), (int) (sprite.Y + SpriteOffset.Y), 
-                sprite.Width, sprite.Height);
-            UpdateAutomaticHitBox(sprite);
+            if (Enabled) { 
+                Sprite.position.X = DrawX;
+                Sprite.position.Y = DrawY;
+                sprite.Texture.SetOpacity(Opacity);
+                Sprite.DrawTexture(
+                    sprite.Texture,
+                    (int) (sprite.X + SpriteOffset.X), (int) (sprite.Y + SpriteOffset.Y), 
+                    sprite.Width, sprite.Height);
+                UpdateAutomaticHitBox(sprite);
+            }
         }
 
         public virtual void UpdateAutomaticHitBox(SpriteAsset sprite)
@@ -149,7 +151,7 @@ namespace Aiv.Engine
         public override void Draw()
         {
             base.Draw();
-            if (CanDraw)
+            if (CanDraw && Enabled)
             {
                 if (CurrentAnimation != null)
                 {
@@ -198,11 +200,17 @@ namespace Aiv.Engine
 
         public override GameObject Clone()
         {
-            var go = new SpriteObject((int) Width, (int) Height);
+            var go = new SpriteObject((int) Width, (int) Height, AutomaticHitBox, AutomaticHitBoxName);
             go.Name = Name;
             go.X = X;
             go.Y = Y;
-            go.CurrentSprite = CurrentSprite.Clone();
+            go.Scale = Scale;
+            go.Rotation = Rotation;
+            go.Opacity = Opacity;
+            go.SpriteOffset = SpriteOffset;
+            go.Pivot = Pivot;
+            if (CurrentSprite != null)
+                go.CurrentSprite = (SpriteAsset) CurrentSprite.Clone();
             if (Animations != null)
             {
                 go.Animations = new Dictionary<string, Animation>();
@@ -236,7 +244,7 @@ namespace Aiv.Engine
                     anim.Sprites = new List<SpriteAsset>();
                     foreach (var spriteAsset in Sprites)
                     {
-                        anim.Sprites.Add(spriteAsset.Clone());
+                        anim.Sprites.Add((SpriteAsset) spriteAsset.Clone());
                     }
                 }
                 anim.Loop = Loop;

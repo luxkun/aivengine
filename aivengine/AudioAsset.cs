@@ -16,16 +16,18 @@ namespace Aiv.Engine
     {
         public AudioAsset(string fileName, bool stream = false) : base(fileName)
         {
+            Stream = stream;
             if (!stream)
                 Clip = new AudioClip(FileName);
         }
 
-        public AudioClip Clip { get; set; }
+        public AudioClip Clip { get; }
+        public bool Stream { get; }
 
-        public AudioAsset Clone()
+        // no need to clone audio asset
+        public override Asset Clone()
         {
-            var go = new AudioAsset(BaseFileName);
-            return go;
+            return this;
         }
     }
 }

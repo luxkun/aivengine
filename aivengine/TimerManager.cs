@@ -71,9 +71,9 @@ namespace Aiv.Engine
                     timers[key] -= ignoreTimeModifiers[key]
                         ? (owner == null ? engine.UnchangedDeltaTime : owner.UnchangedDeltaTime)
                         : (owner == null ? engine.UnchangedDeltaTime : owner.DeltaTime);
+                    if (timers[key] <= 0 && callBacks.ContainsKey(key))
+                        callBacks[key].Item1(owner, callBacks[key].Item2);
                 }
-                else if (callBacks.ContainsKey(key))
-                    callBacks[key].Item1(owner, callBacks[key].Item2);
             }
         }
     }

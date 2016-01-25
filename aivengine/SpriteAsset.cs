@@ -123,7 +123,7 @@ namespace Aiv.Engine
             return cachedHitBoxInfo;
         }
 
-        public SpriteAsset Clone()
+        public override Asset Clone()
         {
             var go = new SpriteAsset(BaseFileName, X, Y, Width, Height);
             return go;

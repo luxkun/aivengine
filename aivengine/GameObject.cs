@@ -194,9 +194,11 @@ namespace Aiv.Engine
         {
             // call event handlers
             OnDestroy?.Invoke(this);
-            Enabled = false;
 
-            AudioSource.Dispose();
+            Enabled = false;
+            
+            audioSource?.Dispose();
+            audioSource = null;
             Engine?.RemoveObject(this);
         }
 
