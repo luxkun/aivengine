@@ -215,6 +215,16 @@ namespace Aiv.Engine
             return Window.GetKey(key);
         }
 
+        public bool AnyKeyDown()
+        {
+            foreach (KeyCode key in Enum.GetValues(typeof(KeyCode)))
+            {
+                if (IsKeyDown(key))
+                    return true;
+            }
+            return false;
+        }
+
         /*
 		 * 
 		 * Asset's management
