@@ -73,7 +73,7 @@ namespace Example
             // load repeating texture
             var repeatingGoblins = new SpriteAsset("goblins.png", 100, 100, 150, 150, repeatx: true, repeaty: true);
             // auto hitbox and spriteasset with repeatx or/and repeaty are NOT compatible
-            var obj = new SpriteObject(repeatingGoblins.Width + 20, repeatingGoblins.Height + 100);
+            var obj = new SpriteObject(repeatingGoblins.Width + 20, repeatingGoblins.Height + 100, true, "hitboxname");
             obj.CurrentSprite = repeatingGoblins;
 
             obj.OnUpdate += sender =>

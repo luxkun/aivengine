@@ -69,7 +69,7 @@ namespace Aiv.Engine
         public float BaseWidth => Sprite.Width;
         public float BaseHeight => Sprite.Height;
 
-        public bool AutomaticHitBox { get; }
+        public bool AutomaticHitBox { get; set; }
         public string AutomaticHitBoxName { get; }
 
         public SpriteObject(int width, int height, bool automaticHitBox = false, string automaticHitBoxName = "auto")
