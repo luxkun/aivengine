@@ -38,6 +38,10 @@
       <HintPath>..\packages\Aiv.Vorbis.0.2.0\lib\net45\aiv-vorbis.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="FarseerPhysics, Version=3.5.0.38023, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FarseerPhysics.3.5.0\lib\NET40\FarseerPhysics.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="NVorbis, Version=0.8.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\NVorbis.0.8.4.0\lib\NVorbis.dll</HintPath>
       <Private>True</Private>

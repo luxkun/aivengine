@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using Aiv.Fast2D;
 using Aiv.Vorbis;
+using FarseerPhysics;
+using FarseerPhysics.Dynamics;
 using OpenTK;
 
 namespace Aiv.Engine
@@ -46,6 +48,8 @@ namespace Aiv.Engine
         {
             Timer = new TimerManager(this);
         }
+
+        public virtual Body RigidBody { get; set; }
 
         public virtual bool CanDraw { get; set; } = true;
 
@@ -86,8 +90,6 @@ namespace Aiv.Engine
 
         public Engine Engine { get; internal set; }
 
-        public Dictionary<string, HitBox> HitBoxes { get; private set; }
-
         public virtual int Id { get; set; }
 
         public virtual bool IgnoreCamera { get; set; } = false;
@@ -123,61 +125,6 @@ namespace Aiv.Engine
         public event StartEventHandler OnStart;
         public event UpdateEventHandler OnUpdate;
 
-        public void AddHitBox(string name, int x, int y, int width, int height)
-        {
-            if (HitBoxes == null)
-            {
-                HitBoxes = new Dictionary<string, HitBox>();
-            }
-            var hbox = new HitBox(name, x, y, width, height) {Owner = this};
-            HitBoxes[name] = hbox;
-        }
-
-        public bool HasCollisions()
-        {
-            if (HitBoxes == null) return false;
-            foreach (var obj in Engine.Objects.Values)
-            {
-                if (!obj.Enabled || obj == this || obj.HitBoxes == null)
-                    continue;
-                foreach (var hitBox in HitBoxes.Values)
-                {
-                    foreach (var otherHitBox in obj.HitBoxes.Values)
-                    {
-                        if (hitBox.CollideWith(otherHitBox))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        // check with all objects
-        public List<Collision> CheckCollisions()
-        {
-            var collisions = new List<Collision>();
-            if (HitBoxes == null) return collisions;
-            foreach (var obj in Engine.Objects.Values)
-            {
-                if (!obj.Enabled || obj == this || obj.HitBoxes == null)
-                    continue;
-                foreach (var hitBox in HitBoxes.Values)
-                {
-                    foreach (var otherHitBox in obj.HitBoxes.Values)
-                    {
-                        if (hitBox.CollideWith(otherHitBox))
-                        {
-                            var collision = new Collision(hitBox.Name, obj, otherHitBox.Name);
-                            collisions.Add(collision);
-                        }
-                    }
-                }
-            }
-            return collisions;
-        }
-
         // every subclass should override this
         public virtual GameObject Clone()
         {
@@ -185,7 +132,8 @@ namespace Aiv.Engine
             {
                 Name = Name,
                 X = X,
-                Y = Y
+                Y = Y,
+                RigidBody = RigidBody.Clone()
             };
             return go;
         }
@@ -207,10 +155,32 @@ namespace Aiv.Engine
             OnBeforeUpdate?.Invoke(this);
 
             Timer.Update();
+            ApplyRigidBody();
             Update();
             OnUpdate?.Invoke(this);
 
             OnAfterUpdate?.Invoke(this);
+        }
+        
+        public virtual void MoveTo(float x, float y)
+        {
+            if (RigidBody != null) { 
+                RigidBody.Position = ConvertUnits.ToSimUnits(
+                    new Microsoft.Xna.Framework.Vector2(x, y)
+                );
+            }
+        }
+
+        public virtual float Rotation { get; set; }
+
+        protected virtual void ApplyRigidBody()
+        {
+            if (RigidBody != null) { 
+                var pos = ConvertUnits.ToDisplayUnits(RigidBody.Position);
+                X = pos.X;
+                Y = pos.Y;
+                Rotation = RigidBody.Rotation;
+            }
         }
 
         public virtual void Initialize()
@@ -227,88 +197,6 @@ namespace Aiv.Engine
         // this is called by the game loop at every cycle
         public virtual void Update()
         {
-        }
-
-        public class HitBox
-        {
-            public string Name;
-            public GameObject Owner;
-            private int width;
-            private int height;
-            private float x;
-            private float y;
-
-            public bool UseScaling { get; set; } = true;
-
-            public int Width
-            {
-                get { return (int)(width * (UseScaling ? Owner.Scale.X : 1)); }
-                set { width = value; }
-            }
-
-            public int Height
-            {
-                get { return (int)(height * (UseScaling ? Owner.Scale.Y : 1)); }
-                set { height = value; }
-            }
-
-            public float RealHeight => Height ;
-
-            public HitBox(string name, int x, int y, int width, int height)
-            {
-                Name = name;
-                X = x;
-                Y = y;
-                Width = width;
-                Height = height;
-            }
-
-            public float X
-            {
-                get { return x * (UseScaling ? Owner.Scale.X : 1); }
-                set { x = value; }
-            }
-
-            public float Y
-            {
-                get { return y * (UseScaling ? Owner.Scale.Y : 1); }
-                set { y = value; }
-            }
-
-            public HitBox Clone()
-            {
-                return (HitBox) MemberwiseClone();
-            }
-
-            public bool CollideWith(HitBox other)
-            {
-                var x1 = (int) (Owner.DrawX + X);
-                var y1 = (int) (Owner.DrawY + Y);
-                var x2 = (int) (other.Owner.DrawX + other.X);
-                var y2 = (int) (other.Owner.DrawY + other.Y);
-                // simple rectangle collision check
-                if (x1 + Width >= x2 &&
-                    x1 <= x2 + other.Width &&
-                    y1 + Height >= y2 &&
-                    y1 <= y2 + other.Height)
-                    return true;
-                // no collision
-                return false;
-            }
-        }
-
-        public class Collision
-        {
-            public Collision(string hitBoxName, GameObject other, string otherHitBoxName)
-            {
-                HitBox = hitBoxName;
-                Other = other;
-                OtherHitBox = otherHitBoxName;
-            }
-
-            public string HitBox { get; private set; }
-            public GameObject Other { get; private set; }
-            public string OtherHitBox { get; private set; }
         }
     }
 

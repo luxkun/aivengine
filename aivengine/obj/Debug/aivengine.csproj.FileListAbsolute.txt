@@ -6,3 +6,4 @@ C:\Users\Lukian\Dropbox\AIV\GitProjects\aivengine-1\aivengine\bin\Debug\OpenTK.x
 C:\Users\Lukian\Dropbox\AIV\GitProjects\aivengine-1\aivengine\obj\Debug\aivengine.csprojResolveAssemblyReference.cache
 C:\Users\Lukian\Dropbox\AIV\GitProjects\aivengine-1\aivengine\obj\Debug\aivengine.dll
 C:\Users\Lukian\Dropbox\AIV\GitProjects\aivengine-1\aivengine\obj\Debug\aivengine.pdb
+C:\Users\Lukian\Dropbox\AIV\GitProjects\aivengine-1\aivengine\bin\Debug\FarseerPhysics.dll

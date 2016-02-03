@@ -37,16 +37,10 @@ namespace Aiv.Engine
             set { Sprite.pivot = value; }
         }
 
-        public float Rotation
+        public override float Rotation
         {
             get { return Sprite.Rotation; }
             set { Sprite.Rotation = value; }
-        }
-
-        public float EulerRotation
-        {
-            get { return Sprite.EulerRotation; }
-            set { Sprite.EulerRotation = value; }
         }
 
         public float Opacity { get; set; } = 1f;
@@ -69,14 +63,12 @@ namespace Aiv.Engine
         public float BaseWidth => Sprite.Width;
         public float BaseHeight => Sprite.Height;
 
-        public bool AutomaticHitBox { get; set; }
-        public string AutomaticHitBoxName { get; }
-
-        public SpriteObject(int width, int height, bool automaticHitBox = false, string automaticHitBoxName = "auto")
+        public SpriteObject(int width, int height)
         {
             Sprite = new Sprite(width, height);
-            AutomaticHitBox = automaticHitBox;
-            AutomaticHitBoxName = automaticHitBoxName;
+
+            // center the pivot, for physics
+            Pivot = new Vector2(width / 2, height / 2);
         }
 
 
@@ -126,25 +118,6 @@ namespace Aiv.Engine
                     sprite.Texture,
                     (int) (sprite.X + SpriteOffset.X), (int) (sprite.Y + SpriteOffset.Y), 
                     sprite.Width, sprite.Height);
-                UpdateAutomaticHitBox(sprite);
-            }
-        }
-
-        public virtual void UpdateAutomaticHitBox(SpriteAsset sprite)
-        {
-            if (AutomaticHitBox)
-            {
-                if (HitBoxes == null || !HitBoxes.ContainsKey(AutomaticHitBoxName)) { 
-                    AddHitBox(AutomaticHitBoxName, 0, 0, 1, 1);
-                    HitBoxes[AutomaticHitBoxName].UseScaling = false;
-                }
-                var hitBoxInfo = sprite.CalculateRealHitBox();
-                var deltaW = (float)Sprite.Width/sprite.Width;
-                var deltaH = (float)Sprite.Height/sprite.Height;
-                HitBoxes[AutomaticHitBoxName].X = hitBoxInfo.Item1.X * deltaW * Scale.X;
-                HitBoxes[AutomaticHitBoxName].Y = hitBoxInfo.Item1.Y * deltaW * Scale.Y;
-                HitBoxes[AutomaticHitBoxName].Width = (int)(hitBoxInfo.Item2.X * deltaW * Scale.X);
-                HitBoxes[AutomaticHitBoxName].Height = (int)(hitBoxInfo.Item2.Y * deltaH * Scale.Y);
             }
         }
 
@@ -200,7 +173,7 @@ namespace Aiv.Engine
 
         public override GameObject Clone()
         {
-            var go = new SpriteObject((int) Width, (int) Height, AutomaticHitBox, AutomaticHitBoxName);
+            var go = new SpriteObject((int) Width, (int) Height);
             go.Name = Name;
             go.X = X;
             go.Y = Y;
@@ -221,6 +194,7 @@ namespace Aiv.Engine
                 }
             }
             go.CurrentAnimation = CurrentAnimation;
+            go.RigidBody = RigidBody.Clone();
             return go;
         }
 

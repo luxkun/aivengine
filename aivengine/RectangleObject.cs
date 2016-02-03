@@ -8,30 +8,49 @@ Forked by Luciano Ferraro
 
 using System.Drawing;
 using Aiv.Fast2D;
+using OpenTK;
 
 namespace Aiv.Engine
 {
     public class RectangleObject : GameObject
     {
-        public RectangleObject(int Width, int Height)
+        public RectangleObject(int width, int height)
         {
-            Box = new Box(Width, Height);
+            Box = new Box(width, height);
+
+            // center the pivot, for physics
+            Pivot = new Vector2(width / 2, height / 2);
         }
 
-        public float Width
-        {
-            get { return Box.Width; }
-        }
+        public float Width => Box.Width;
 
-        public float Height
+        public float Height => Box.Height;
+
+        public override float Rotation
         {
-            get { return Box.Height; }
+            get { return Box.Rotation; }
+            set { Box.Rotation = value; }
+        }
+        public Vector2 Pivot
+        {
+            get { return Box.pivot; }
+            set { Box.pivot = value; }
         }
 
         public bool Fill
         {
             get { return Box.Fill; }
             set { Box.Fill = value; }
+        }
+
+        public override Vector2 Scale
+        {
+            get { return base.Scale; }
+            set
+            {
+                base.Scale = value;
+                Box.scale = value;
+            }
         }
 
         public Color Color
@@ -54,6 +73,7 @@ namespace Aiv.Engine
         {
             var go = (RectangleObject) base.Clone();
             go.Box = Box.Clone();
+            go.RigidBody = RigidBody.Clone();
             return go;
         }
     }

@@ -13,6 +13,9 @@ using System.Linq;
 using System.Threading;
 using Aiv.Fast2D;
 using Aiv.Vorbis;
+using FarseerPhysics;
+using FarseerPhysics.Dynamics;
+using Microsoft.Xna.Framework;
 using OpenTK.Audio;
 
 namespace Aiv.Engine
@@ -25,9 +28,6 @@ namespace Aiv.Engine
 
         public const float MaxDeltaTime = 0.33f;
         
-        public bool debugCollisions;
-        private Dictionary<GameObject.HitBox, Tuple<RectangleObject, Tuple<float, float, int, int>>> debugCollisionsBoxes;
-
         // objects that need to be added (1) or removed (0) from sortedObjects
         // objects that have changed order (2)
         private Dictionary<GameObject, int> dirtyObjects;
@@ -41,9 +41,9 @@ namespace Aiv.Engine
         {
         }
 
-        public Engine(string windowName, int width, int height, int fps = 60, bool fullscreen = false, bool vsync = false)
+        public Engine(string windowName, int width, int height, int fps = 60, bool fullscreen = false, bool vsync = false, float gravityX = 0f, float gravityY = 0f)
         {
-            Initialize();
+            Initialize(gravityX, gravityY);
 
             wantedDeltaTime = fps > 0 ? 1f/fps : 0;
 
@@ -107,7 +107,7 @@ namespace Aiv.Engine
             Time += DeltaTime;
 
             Timer.Update();
-
+            
             OnBeforeUpdate?.Invoke(this);
 
             foreach (var obj in SortedObjects)
@@ -119,32 +119,12 @@ namespace Aiv.Engine
                 if (!obj.Enabled)
                     continue;
                 obj.Draw();
-                if (debugCollisions && obj.HitBoxes != null)
-                {
-                    foreach (var hitBox in obj.HitBoxes.Values)
-                    {
-                        if (hitBox.Width <= 0 || hitBox.Height <= 0)
-                            continue;
-                        var key = Tuple.Create(hitBox.X, hitBox.Y, hitBox.Width, hitBox.Height);
-                        if (!debugCollisionsBoxes.ContainsKey(hitBox) ||
-                            !debugCollisionsBoxes[hitBox].Item2.Equals(key)
-                            //hitBox.X != debugCollisionsBoxes[hitBox].X || hitBox.Y != debugCollisionsBoxes[hitBox].Y ||
-                            //hitBox.Width != debugCollisionsBoxes[hitBox].Width ||
-                            //hitBox.Height != debugCollisionsBoxes[hitBox].Height
-                            )
-                            debugCollisionsBoxes[hitBox] = Tuple.Create(new RectangleObject(hitBox.Width, hitBox.Height)
-                            {
-                                Color = Color.Green
-                            }, key);
-                        var rectangle = debugCollisionsBoxes[hitBox].Item1;
-                        rectangle.X = obj.DrawX + hitBox.X;
-                        rectangle.Y = obj.DrawY + hitBox.Y;
-                        rectangle.Draw();
-                    }
-                }
             }
 
             OnAfterUpdate?.Invoke(this);
+
+            World.Step(DeltaTime);
+            Thread.Sleep(1);
 
             if (dirtyObjects.Count > 0)
             {
@@ -170,11 +150,17 @@ namespace Aiv.Engine
             }
         }
 
+        public World World { get; set; }
 
-        protected void Initialize()
+
+        protected void Initialize(float gravityX, float gravityY)
         {
             // crappy
             new AudioSource();
+
+            World = new World(new Vector2(gravityX, gravityY));
+            World.EnableSubStepping = true;
+            ConvertUnits.SetDisplayUnitToSimUnitRatio(64f); 
 
             Camera = new Camera();
 
@@ -186,8 +172,6 @@ namespace Aiv.Engine
             dirtyObjects = new Dictionary<GameObject, int>();
 
             Joysticks = new Joystick[8];
-
-            debugCollisionsBoxes = new Dictionary<GameObject.HitBox, Tuple<RectangleObject, Tuple<float, float, int, int>>>();
 
             Timer = new TimerManager(this);
         }
@@ -239,11 +223,6 @@ namespace Aiv.Engine
 
         public void RemoveObject(GameObject obj)
         {
-            if (debugCollisions && obj.HitBoxes != null)
-                foreach (var hitBox in obj.HitBoxes.Values)
-                    if (debugCollisionsBoxes.ContainsKey(hitBox))
-                        debugCollisionsBoxes.Remove(hitBox);
-
             Objects.Remove(obj.Name);
             dirtyObjects[obj] = 0;
         }
@@ -254,7 +233,6 @@ namespace Aiv.Engine
             IsGameRunning = true;
 
             // compute update frequency
-            //int freq = 1000 / this.fps;
 
             while (IsGameRunning && Window.opened)
             {
@@ -262,10 +240,10 @@ namespace Aiv.Engine
                 if (!Window.opened)
                     IsGameRunning = false;
                 // maybe calculate average DeltaTime
-                //if (Window.deltaTime < wantedDeltaTime)
-                //{
-                //    Thread.Sleep((int)((wantedDeltaTime - Window.deltaTime) * 111000));
-                //}
+                if (Window.deltaTime < wantedDeltaTime)
+                {
+                    Thread.Sleep((int)((wantedDeltaTime - Window.deltaTime)));
+                }
             }
             IsGameRunning = false;
         }
